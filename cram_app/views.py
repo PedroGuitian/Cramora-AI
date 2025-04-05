@@ -2,8 +2,22 @@ from openai import OpenAI
 import os
 from django.shortcuts import render
 import markdown
+from django.contrib.auth.forms import UserCreationForm
+from django.contrib.auth import login
+from django.shortcuts import render, redirect
 
 client = OpenAI(api_key=os.getenv("OPENAI_API_KEY"))
+
+def signup_view(request):
+    if request.method == "POST":
+        form = UserCreationForm(request.POST)
+        if form.is_valid():
+            user = form.save()
+            login(request, user)
+            return redirect("home")
+    else:
+        form = UserCreationForm()
+    return render(request, "cram_app/signup.html", {"form": form})
 
 def home(request):
     return render(request, "cram_app/home.html")
