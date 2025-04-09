@@ -4,19 +4,16 @@
 
 {% block content %}
   <h2>📚 My Saved Cram Sheets</h2>
-
-  {% if sheets %}
     <ul>
-      {% for sheet in sheets %}
-        <li>
-          <h3>{{ sheet.title }}</h3>
-          <small>{{ sheet.created_at|date:"M d, Y" }}</small>
-          <div class="cram-sheet">{{ sheet.content|safe }}</div>
-          <hr>
-        </li>
-      {% endfor %}
+        {% for sheet in cram_sheets %}
+            <li>
+                <a href="{% url 'cram_sheet_detail' sheet.id %}">
+                    {{ sheet.title }}
+                </a>
+                <hr>
+            </li>
+        {% empty %}
+            <p>You haven't saved any cram sheets yet</p> 
+        {% endfor %}
     </ul>
-  {% else %}
-    <p>You haven't saved any cram sheets yet.</p>
-  {% endif %}
 {% endblock %}

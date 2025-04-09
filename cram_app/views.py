@@ -1,10 +1,9 @@
 from openai import OpenAI
 import os
-from django.shortcuts import render
 import markdown
 from django.contrib.auth.forms import UserCreationForm
 from django.contrib.auth import login
-from django.shortcuts import render, redirect
+from django.shortcuts import render, redirect, get_object_or_404
 from django.contrib.auth.decorators import login_required
 from .models import CramSheet
 
@@ -70,5 +69,34 @@ def save_cram_sheet(request):
 
 @login_required
 def my_cram_sheets(request):
-    sheets = CramSheet.objects.filter(user=request.user).order_by('-created_at')
-    return render(request, "cram_app/my_cram_sheets.html", {"sheets": sheets})
+    cram_sheets = CramSheet.objects.filter(user=request.user)
+    return render(request, 'cram_app/my_cram_sheets.html', {
+        'cram_sheets': cram_sheets
+    })
+
+@login_required
+def cram_sheet_detail(request, sheet_id):
+    sheet = get_object_or_404(CramSheet, id=sheet_id, user=request.user)
+    return render(request, "cram_app/cram_sheet_detail.html", {
+        "sheet": sheet
+    })
+
+@login_required
+def delete_cram_sheet(request, sheet_id):
+    sheet = get_object_or_404(CramSheet, id=sheet_id, user=request.user)
+
+    if request.method == "POST":
+        sheet.delete()
+        return redirect('my_cram_sheets')
+
+@login_required
+def generate_questions(request, sheet_id):
+    sheet = get_object_or_404(CramSheet, id=sheet_id, user=request.user)
+
+    if request.method == "POST":
+        # Placeholder for actual OpenAI logic
+        sheet.questions_generated = True
+        sheet.save()
+
+        # Redirect back to detail page
+        return redirect('cram_sheet_detail', sheet_id=sheet.id)
