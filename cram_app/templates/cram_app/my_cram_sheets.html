@@ -1,0 +1,22 @@
+{% extends 'cram_app/layout.html' %}
+
+{% block title %}My Cram Sheets{% endblock %}
+
+{% block content %}
+  <h2>📚 My Saved Cram Sheets</h2>
+
+  {% if sheets %}
+    <ul>
+      {% for sheet in sheets %}
+        <li>
+          <h3>{{ sheet.title }}</h3>
+          <small>{{ sheet.created_at|date:"M d, Y" }}</small>
+          <div class="cram-sheet">{{ sheet.content|safe }}</div>
+          <hr>
+        </li>
+      {% endfor %}
+    </ul>
+  {% else %}
+    <p>You haven't saved any cram sheets yet.</p>
+  {% endif %}
+{% endblock %}
