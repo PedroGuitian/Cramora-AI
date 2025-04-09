@@ -49,21 +49,22 @@ nav a:hover {
   font-weight: 500;
   margin: 0 15px;
   cursor: pointer;
-  transition: color 0.3s ease, text-decoration 0.3s ease;
   text-decoration: none;
-  background: none;
+  background-color: transparent;  /* 👈 ensures no background */
   border: none;
   box-shadow: none;
   padding: 0;
-  transform: none;
+  transition: color 0.3s ease, text-decoration 0.3s ease, transform 0.2s ease;
 }
 
 .nav-link:hover,
 .nav-link:focus {
   color: #0056b3;
   text-decoration: underline;
-  background: none;
-  transform: none; 
+  transform: translateY(-2px);
+  background-color: transparent;  /* 👈 prevents hover background */
+  box-shadow: none;
+  outline: none;
 }
 
 textarea {
