@@ -6,8 +6,15 @@ from django.contrib.auth import login
 from django.shortcuts import render, redirect, get_object_or_404
 from django.contrib.auth.decorators import login_required
 from .models import CramSheet, TestQuestion
+from django.contrib.auth.views import LoginView, LogoutView
 
 client = OpenAI(api_key=os.getenv("OPENAI_API_KEY"))
+
+class CustomLoginView(LoginView):
+    template_name = 'cram_app/login.html'
+
+class CustomLogoutView(LogoutView):
+    next_page = 'login'  # Redirect to login after logout
 
 def signup_view(request):
     if request.method == "POST":
