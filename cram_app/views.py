@@ -5,7 +5,7 @@ from django.contrib.auth.forms import UserCreationForm
 from django.contrib.auth import login
 from django.shortcuts import render, redirect, get_object_or_404
 from django.contrib.auth.decorators import login_required
-from .models import CramSheet
+from .models import CramSheet, TestQuestion
 
 client = OpenAI(api_key=os.getenv("OPENAI_API_KEY"))
 
@@ -94,9 +94,43 @@ def generate_questions(request, sheet_id):
     sheet = get_object_or_404(CramSheet, id=sheet_id, user=request.user)
 
     if request.method == "POST":
-        # Placeholder for actual OpenAI logic
+        prompt = f"""
+        Based on the following cram sheet, generate 10 concise, challenging test questions (mix of multiple choice and short answer):
+
+        {sheet.content}
+
+        Format clearly like:
+        1. What is...
+        2. Explain...
+        """
+
+        response = client.chat.completions.create(
+            model="gpt-4o",
+            messages=[
+                {"role": "system", "content": "You are a quiz generator."},
+                {"role": "user", "content": prompt}
+            ],
+            temperature=0.5,
+            max_tokens=500
+        )
+
+        questions_text = response.choices[0].message.content.strip().split('\n')
+        questions = [q.strip() for q in questions_text if q.strip()]
+
+        for q in questions:
+            TestQuestion.objects.create(cram_sheet=sheet, question_text=q)
+
         sheet.questions_generated = True
         sheet.save()
 
-        # Redirect back to detail page
-        return redirect('cram_sheet_detail', sheet_id=sheet.id)
+        return redirect('view_questions', sheet_id=sheet.id)
+
+@login_required
+def view_questions(request, sheet_id):
+    sheet = get_object_or_404(CramSheet, id=sheet_id, user=request.user)
+    questions = sheet.questions.all()
+
+    return render(request, "cram_app/view_questions.html", {
+        "sheet": sheet,
+        "questions": questions
+    })
