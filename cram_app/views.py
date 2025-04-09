@@ -5,6 +5,8 @@ import markdown
 from django.contrib.auth.forms import UserCreationForm
 from django.contrib.auth import login
 from django.shortcuts import render, redirect
+from django.contrib.auth.decorators import login_required
+from .models import CramSheet
 
 client = OpenAI(api_key=os.getenv("OPENAI_API_KEY"))
 
@@ -48,7 +50,7 @@ def cram_sheet(request):
                     {"role": "user", "content": prompt}
                 ],
                 temperature=0.7,
-                max_tokens=800
+                max_tokens=500
             )
             # Convert Markdown → HTML
             summary_raw = response.choices[0].message.content
@@ -57,3 +59,16 @@ def cram_sheet(request):
     return render(request, "cram_app/cram_sheet.html", {
         "summary": summary
     })
+
+@login_required
+def save_cram_sheet(request):
+    if request.method == "POST":
+        title = request.POST.get("title", "Untitled")
+        content = request.POST.get("content")
+        CramSheet.objects.create(user=request.user, title=title, content=content)
+        return redirect('my_cram_sheets')
+
+@login_required
+def my_cram_sheets(request):
+    sheets = CramSheet.objects.filter(user=request.user).order_by('-created_at')
+    return render(request, "cram_app/my_cram_sheets.html", {"sheets": sheets})
