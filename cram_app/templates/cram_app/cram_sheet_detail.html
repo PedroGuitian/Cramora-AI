@@ -18,15 +18,15 @@
     {% if not sheet.questions_generated %}
       <form method="post" action="{% url 'generate_questions' sheet.id %}" style="display: inline;">
         {% csrf_token %}
-        <button type="submit">🧠 Generate Questions</button>
+        <button type="submit">Generate Questions</button>
       </form>
     {% else %}
       <a href="{% url 'view_questions' sheet.id %}">
-        <button type="button">📋 Test Questions</button>
+        <button type="button">Test Questions</button>
       </a>
 
       <a href="{% url 'take_quiz' sheet.id %}">
-        <button type="button">🧪 Take Quiz</button>
+        <button type="button">Take Quiz</button>
       </a>
     {% endif %}
   </div>

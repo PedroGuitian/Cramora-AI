@@ -1,0 +1,29 @@
+{% extends 'cram_app/layout.html' %}
+
+{% block title %}Edit Question{% endblock %}
+
+{% block content %}
+  <h2>✏️ Edit Question</h2>
+  <form method="post">
+    {% csrf_token %}
+    {{ form.non_field_errors }}
+
+    <label for="id_question_text">Question:</label><br>
+    {{ form.question_text }}<br><br>
+
+    <label for="id_correct_answer">Correct Answer:</label><br>
+    {{ form.correct_answer }}<br><br>
+
+    <label for="id_wrong1">Wrong Answer 1:</label><br>
+    {{ form.wrong1 }}<br><br>
+
+    <label for="id_wrong2">Wrong Answer 2:</label><br>
+    {{ form.wrong2 }}<br><br>
+
+    <label for="id_wrong3">Wrong Answer 3:</label><br>
+    {{ form.wrong3 }}<br><br>
+
+    <button type="submit">Save Changes</button>
+    <a href="{% url 'view_questions' question.cram_sheet.id %}" class="nav-link">Cancel</a>
+  </form>
+{% endblock %}
