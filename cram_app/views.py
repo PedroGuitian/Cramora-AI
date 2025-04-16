@@ -1,12 +1,15 @@
 from openai import OpenAI
 import os
 import markdown
+import json
 from django.contrib.auth.forms import UserCreationForm
 from django.contrib.auth import login
 from django.shortcuts import render, redirect, get_object_or_404
 from django.contrib.auth.decorators import login_required
 from .models import CramSheet, TestQuestion
 from django.contrib.auth.views import LoginView, LogoutView
+from django.http import JsonResponse, HttpResponseBadRequest
+from django.core.serializers.json import DjangoJSONEncoder
 
 client = OpenAI(api_key=os.getenv("OPENAI_API_KEY"))
 
@@ -100,37 +103,60 @@ def delete_cram_sheet(request, sheet_id):
 def generate_questions(request, sheet_id):
     sheet = get_object_or_404(CramSheet, id=sheet_id, user=request.user)
 
-    if request.method == "POST":
+    if request.method == "POST" and not sheet.questions_generated:
         prompt = f"""
-        Based on the following cram sheet, generate 10 concise, challenging test questions (mix of multiple choice and short answer):
+        Generate 5 multiple-choice quiz questions based on the following cram sheet. 
+        Each question should have a "question", a "correct_answer", and a list of exactly three "wrong_answers".
 
+        Return the questions in JSON format like this:
+        [
+          {{
+            "question": "What does CPU stand for?",
+            "correct_answer": "Central Processing Unit",
+            "wrong_answers": ["Computer Performance Unit", "Central Performance Utility", "Compute Processor Unit"]
+          }},
+          ...
+        ]
+
+        Cram Sheet:
         {sheet.content}
-
-        Format clearly like:
-        1. What is...
-        2. Explain...
         """
+        try:
+            response = client.chat.completions.create(
+                model="gpt-4o",
+                messages=[
+                    {"role": "system", "content": "You are a quiz generator AI."},
+                    {"role": "user", "content": prompt}
+                ],
+                temperature=0.7,
+                max_tokens=1000
+            )
 
-        response = client.chat.completions.create(
-            model="gpt-4o",
-            messages=[
-                {"role": "system", "content": "You are a quiz generator."},
-                {"role": "user", "content": prompt}
-            ],
-            temperature=0.5,
-            max_tokens=500
-        )
+            content = response.choices[0].message.content.strip()
+            if content.startswith("```"):
+                content = content.strip("```")
+                content = content.replace("json", "", 1).strip()
 
-        questions_text = response.choices[0].message.content.strip().split('\n')
-        questions = [q.strip() for q in questions_text if q.strip()]
+            # Try to parse the response as JSON
+            questions = json.loads(content)
 
-        for q in questions:
-            TestQuestion.objects.create(cram_sheet=sheet, question_text=q)
+            for q in questions:
+                TestQuestion.objects.create(
+                    cram_sheet=sheet,
+                    question_text=q["question"],
+                    correct_answer=q["correct_answer"],
+                    wrong_answers=q["wrong_answers"]
+                )
 
-        sheet.questions_generated = True
-        sheet.save()
+            sheet.questions_generated = True
+            sheet.save()
 
-        return redirect('view_questions', sheet_id=sheet.id)
+            return redirect("cram_sheet_detail", sheet_id=sheet.id)
+
+        except json.JSONDecodeError:
+            return HttpResponseBadRequest("Failed to parse question JSON.")
+        except Exception as e:
+            return HttpResponseBadRequest(f"Something went wrong: {e}")
 
 @login_required
 def view_questions(request, sheet_id):
@@ -140,4 +166,22 @@ def view_questions(request, sheet_id):
     return render(request, "cram_app/view_questions.html", {
         "sheet": sheet,
         "questions": questions
+    })
+
+@login_required
+def take_quiz(request, sheet_id):
+    sheet = get_object_or_404(CramSheet, id=sheet_id, user=request.user)
+    questions = sheet.questions.all()
+
+    question_data = []
+    for q in questions:
+        question_data.append({
+            "question_text": q.question_text,
+            "correct_answer": q.correct_answer,
+            "wrong_answers": q.wrong_answers,
+        })
+
+    return render(request, "cram_app/quiz.html", {
+        "cram_sheet": sheet,
+        "questions": question_data  # ✅ serialized
     })
