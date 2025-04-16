@@ -16,7 +16,7 @@
             {{ summary|safe }}
         </div>
         {% if user.is_authenticated %}
-            <button id="openSaveModal">💾 Save Cram Sheet</button>
+            <button id="openSaveModal">Save Cram Sheet</button>
 
             <div id="saveModal" style="display:none;" class="modal-overlay">
                 <div class="modal">
@@ -25,7 +25,7 @@
                     {% csrf_token %}
                     <input type="text" name="title" placeholder="title" required><br><br>
                     <input type="hidden" name="content" value="{{ summary }}">
-                    <button type="submit">💾 Save</button>
+                    <button type="submit">Save</button>
                     <button type="button" id="closeSaveModal">Cancel</button>
                   </form>
                 </div>

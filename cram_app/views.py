@@ -10,6 +10,7 @@ from .models import CramSheet, TestQuestion
 from django.contrib.auth.views import LoginView, LogoutView
 from django.http import JsonResponse, HttpResponseBadRequest
 from django.core.serializers.json import DjangoJSONEncoder
+from .forms import TestQuestionForm, EditTestQuestionForm
 
 client = OpenAI(api_key=os.getenv("OPENAI_API_KEY"))
 
@@ -103,7 +104,7 @@ def delete_cram_sheet(request, sheet_id):
 def generate_questions(request, sheet_id):
     sheet = get_object_or_404(CramSheet, id=sheet_id, user=request.user)
 
-    if request.method == "POST" and not sheet.questions_generated:
+    if request.method == "POST":
         prompt = f"""
         Generate 5 multiple-choice quiz questions based on the following cram sheet. 
         Each question should have a "question", a "correct_answer", and a list of exactly three "wrong_answers".
@@ -133,30 +134,32 @@ def generate_questions(request, sheet_id):
             )
 
             content = response.choices[0].message.content.strip()
+
+            # Remove ```json or ``` if present
             if content.startswith("```"):
-                content = content.strip("```")
+                content = content.strip("`")
                 content = content.replace("json", "", 1).strip()
 
-            # Try to parse the response as JSON
             questions = json.loads(content)
 
             for q in questions:
-                TestQuestion.objects.create(
-                    cram_sheet=sheet,
-                    question_text=q["question"],
-                    correct_answer=q["correct_answer"],
-                    wrong_answers=q["wrong_answers"]
-                )
+                if not TestQuestion.objects.filter(cram_sheet=sheet, question_text=q["question"]).exists():
+                    TestQuestion.objects.create(
+                        cram_sheet=sheet,
+                        question_text=q["question"],
+                        correct_answer=q["correct_answer"],
+                        wrong_answers=q["wrong_answers"]
+                    )
 
-            sheet.questions_generated = True
-            sheet.save()
-
-            return redirect("cram_sheet_detail", sheet_id=sheet.id)
+            return redirect("view_questions", sheet_id=sheet.id)
 
         except json.JSONDecodeError:
             return HttpResponseBadRequest("Failed to parse question JSON.")
         except Exception as e:
             return HttpResponseBadRequest(f"Something went wrong: {e}")
+
+    return redirect("view_questions", sheet_id=sheet.id)
+
 
 @login_required
 def view_questions(request, sheet_id):
@@ -184,4 +187,74 @@ def take_quiz(request, sheet_id):
     return render(request, "cram_app/quiz.html", {
         "cram_sheet": sheet,
         "questions": question_data  # ✅ serialized
+    })
+
+@login_required
+def edit_question(request, question_id):
+    question = get_object_or_404(TestQuestion, id=question_id, cram_sheet__user=request.user)
+
+    if request.method == "POST":
+        form = EditTestQuestionForm(request.POST, instance=question)
+        if form.is_valid():
+            form.save()
+            return redirect("view_questions", sheet_id=question.cram_sheet.id)
+    else:
+        form = EditTestQuestionForm(instance=question)
+
+    return render(request, "cram_app/edit_question.html", {
+        "form": form,
+        "question": question
+    })
+
+@login_required
+def add_question(request, sheet_id):
+    sheet = get_object_or_404(CramSheet, id=sheet_id, user=request.user)
+
+    if request.method == "POST":
+        form = TestQuestionForm(request.POST)
+        if form.is_valid():
+            question = form.save(commit=False)
+            question.cram_sheet = sheet
+
+            # Generate wrong answers using GPT
+            prompt = f"""
+            Generate 3 wrong multiple-choice answers for the following question and its correct answer.
+            Do not include the correct answer in the list.
+
+            Question: {question.question_text}
+            Correct Answer: {question.correct_answer}
+
+            Return just a JSON list, e.g.:
+            ["Wrong Answer 1", "Wrong Answer 2", "Wrong Answer 3"]
+            """
+
+            try:
+                response = client.chat.completions.create(
+                    model="gpt-4o",
+                    messages=[
+                        {"role": "system", "content": "You are a helpful quiz assistant."},
+                        {"role": "user", "content": prompt}
+                    ],
+                    temperature=0.7,
+                    max_tokens=200
+                )
+
+                content = response.choices[0].message.content.strip()
+                if content.startswith("```"):
+                    content = content.strip("```")
+                    content = content.replace("json", "", 1).strip()
+
+                question.wrong_answers = json.loads(content)
+                question.save()
+                return redirect("view_questions", sheet_id=sheet.id)
+
+            except Exception as e:
+                return HttpResponseBadRequest(f"Failed to generate wrong answers: {e}")
+
+    else:
+        form = TestQuestionForm()
+
+    return render(request, "cram_app/add_question.html", {
+        "form": form,
+        "sheet": sheet
     })

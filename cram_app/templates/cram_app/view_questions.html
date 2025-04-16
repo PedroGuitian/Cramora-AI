@@ -1,16 +1,32 @@
 {% extends 'cram_app/layout.html' %}
 
-{% block title %}Test Questions - {{ sheet.title }}{% endblock %}
+{% block title %}Questions - {{ sheet.title }}{% endblock %}
 
 {% block content %}
-  <h2>📋 Test Questions for: {{ sheet.title }}</h2>
+  <h2>Questions for: {{ sheet.title }}</h2>
 
-  <ul>
+  <div style="margin-bottom: 20px;">
+    <a href="{% url 'add_question' sheet.id %}" class="button">Add New Question</a>
+  </div>
+  
+  <div>
     {% for question in questions %}
-      <li>{{ question.question_text }}</li>
+      <div class="question-block" style="margin-bottom: 20px; padding: 15px; border: 1px solid #ccc; border-radius: 8px;">
+        <strong>Q{{ forloop.counter }}:</strong> {{ question.question_text }}<br>
+        <strong>Correct Answer:</strong> {{ question.correct_answer }}<br><br>
+        <a href="{% url 'edit_question' question.id %}" class="button nav-link">Edit</a>
+      </div>
+    {% empty %}
+      <p>No questions have been generated for this cram sheet yet.</p>
     {% endfor %}
-  </ul>
+  </div>
 
-  <br>
-  <a href="{% url 'cram_sheet_detail' sheet.id %}">⬅ Back to Cram Sheet</a>
+  <form method="post" action="{% url 'generate_questions' sheet.id %}" style="margin-top: 30px;">
+    {% csrf_token %}
+    <button type="submit" class="button">Generate AI Questions</button>
+  </form>
+
+  <div style="margin-top: 20px;">
+    <a href="{% url 'take_quiz' sheet.id %}" class="button nav-link">Take Quiz</a>
+  </div>
 {% endblock %}
