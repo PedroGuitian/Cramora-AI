@@ -14,7 +14,14 @@ class CramSheet(models.Model):
 class TestQuestion(models.Model):
     cram_sheet = models.ForeignKey('CramSheet', on_delete=models.CASCADE, related_name='questions')
     question_text = models.TextField()
+    correct_answer = models.CharField(max_length=255)
+    wrong_answers = models.JSONField()  # stores a list of 3 incorrect options
     created_at = models.DateTimeField(auto_now_add=True)
+
+    def get_all_choices(self):
+        choices = self.wrong_answers + [self.correct_answer]
+        random.shuffle(choices)
+        return choices
 
     def __str__(self):
         return f"Q for: {self.cram_sheet.title}"

@@ -24,6 +24,10 @@
       <a href="{% url 'view_questions' sheet.id %}">
         <button type="button">📋 Test Questions</button>
       </a>
+
+      <a href="{% url 'take_quiz' sheet.id %}">
+        <button type="button">🧪 Take Quiz</button>
+      </a>
     {% endif %}
   </div>
 {% endblock %}

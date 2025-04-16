@@ -1,0 +1,63 @@
+{% extends 'cram_app/layout.html' %}
+
+{% block title %}Quiz - {{ cram_sheet.title }}{% endblock %}
+
+{% block content %}
+  <h2>📝 Quiz: {{ cram_sheet.title }}</h2>
+  <div id="quiz-box"></div>
+  <div id="result-box" style="margin-top: 20px; font-weight: bold;"></div>
+{% endblock %}
+
+{% block extra_scripts %}
+<{{ questions|json_script:"quiz-data" }}
+<script>
+  const questions = JSON.parse(document.getElementById("quiz-data").textContent);
+  const quizBox = document.getElementById("quiz-box");
+  const resultBox = document.getElementById("result-box");
+  let currentQuestion = 0;
+  let score = 0;
+
+  function shuffle(array) {
+    return array.sort(() => Math.random() - 0.5);
+  }
+
+  function renderQuestion() {
+    if (currentQuestion >= questions.length) {
+      quizBox.innerHTML = `<h3>✅ Quiz complete!</h3><p>You scored ${score} out of ${questions.length}</p>`;
+      return;
+    }
+
+    const q = questions[currentQuestion];
+    const choices = shuffle([q.correct_answer, ...q.wrong_answers]);
+
+    quizBox.innerHTML = `
+      <h3>Question ${currentQuestion + 1}</h3>
+      <p>${q.question_text}</p>
+      ${choices.map((choice, i) => `
+        <button class="quiz-choice" data-answer="${choice}">${choice}</button>
+      `).join("")}
+    `;
+
+    document.querySelectorAll(".quiz-choice").forEach(button => {
+      button.addEventListener("click", () => {
+        const selected = button.getAttribute("data-answer");
+        if (selected === q.correct_answer) {
+          score++;
+          button.style.color = "green";
+        } else {
+          button.style.color = "red";
+        }
+
+        document.querySelectorAll(".quiz-choice").forEach(btn => btn.disabled = true);
+
+        setTimeout(() => {
+          currentQuestion++;
+          renderQuestion();
+        }, 800);
+      });
+    });
+  }
+
+  renderQuestion();
+</script>
+{% endblock %}

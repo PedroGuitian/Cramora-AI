@@ -13,5 +13,6 @@ urlpatterns = [
     path('cram-sheet/<int:sheet_id>/generate-questions/', views.generate_questions, name='generate_questions'),
     path('cram-sheet/<int:sheet_id>/questions/', views.view_questions, name='view_questions'),
     path('login/', CustomLoginView.as_view(), name='login'),
-    path('logout/', CustomLogoutView.as_view(), name='logout')
+    path('logout/', CustomLogoutView.as_view(), name='logout'),
+    path('cram-sheet/<int:sheet_id>/quiz/', views.take_quiz, name='take_quiz')
 ]
