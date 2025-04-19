@@ -13,8 +13,7 @@
       {% if user.is_authenticated %}
       <nav>
         <a href="{% url 'home' %}" class="nav-link">Home</a>
-        <a href="{% url 'cram_sheet' %}" class="nav-link">Generate Cram Sheet</a>
-        <a href="{% url 'my_cram_sheets' %}" class="nav-link">My Cram Sheets</a>
+        <a href="{% url 'create_cram_hub' %}" class="nav-link">New Cram Hub</a>
         <form method="post" action="{% url 'logout' %}" style="display:inline;">
           {% csrf_token %}
           <button type="submit" class="nav-link">Logout</button>

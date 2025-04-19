@@ -68,6 +68,7 @@ nav a:hover {
 }
 
 textarea {
+  font-family: 'Inter', sans-serif;
   width: 100%;
   padding: 15px;
   font-size: 1rem;
@@ -108,14 +109,39 @@ button:active {
 .cram-sheet {
   background: #f9f9f9;
   border-left: 5px solid #007bff;
-  padding: 20px;
-  margin-top: 25px;
+  padding: 16px;
+  margin-top: 20px;
   border-radius: 8px;
-  white-space: pre-wrap;
-  font-size: 1rem;
-  line-height: 1.8;
+  font-size: 13.5px;
+  line-height: 1.25;
   box-shadow: 0 4px 10px rgba(0, 0, 0, 0.05);
+  max-width: 800px;
 }
+
+/* Remove spacing from headings */
+.cram-sheet h1,
+.cram-sheet h2,
+.cram-sheet h3 {
+  margin-top: 8px;
+  margin-bottom: 4px;
+  font-size: 16px;
+  line-height: 1.2;
+}
+
+/* List styles */
+.cram-sheet ul {
+  padding-left: 20px;
+  margin: 0;
+}
+.cram-sheet li {
+  margin-bottom: 3px;
+}
+
+/* Paragraph styles */
+.cram-sheet p {
+  margin: 4px 0;
+}
+
 
 h2 {
   font-size: 1.8rem;
@@ -158,4 +184,16 @@ p {
   width: 100%;
   box-shadow: 0 10px 30px rgba(0, 0, 0, 0.2);
   text-align: center;
+}
+
+.cram_sheet_list{
+  color: #007bff;
+  text-decoration: none;
+  font-weight: 500;
+  transition: color 0.3s ease;
+}
+
+.ul_no_bullets{
+  list-style-type: none;
+  padding: 0;
 }

@@ -1,16 +1,14 @@
 from openai import OpenAI
 import os
-import markdown
-import json
 from django.contrib.auth.forms import UserCreationForm
 from django.contrib.auth import login
 from django.shortcuts import render, redirect, get_object_or_404
 from django.contrib.auth.decorators import login_required
-from .models import CramSheet, TestQuestion
 from django.contrib.auth.views import LoginView, LogoutView
 from django.http import JsonResponse, HttpResponseBadRequest
 from django.core.serializers.json import DjangoJSONEncoder
-from .forms import TestQuestionForm, EditTestQuestionForm
+from django.core.files.storage import default_storage
+from django.utils.text import slugify
 
 client = OpenAI(api_key=os.getenv("OPENAI_API_KEY"))
 
@@ -34,71 +32,30 @@ def signup_view(request):
 def home(request):
     return render(request, "cram_app/home.html")
 
-def cram_sheet(request):
-    summary = None
-
+@login_required
+def create_cram_hub(request):
     if request.method == "POST":
-        raw_text = request.POST.get("text")
+        title = request.POST.get("title")
+        files = request.FILES.getlist("files")
 
-        if raw_text:
-            prompt = f"""
-            You are a helpful study assistant. Summarize the following study material into a 1-page cram sheet:
+        if not title or not files:
+            return render(request, "cram_app/create_cram_hub.html", {
+                "error": "Please provide a title and upload at least one file."
+            })
 
-            - Be concise and avoid repeating the same points.
-            - Use short, information-dense bullet points or headers.
-            - Avoid extra newlines or large gaps.
-            - Keep it clean, readable, and to the point.
-            - Use a compact structure that fits well on a single printed page.
+        hub = CramHub.objects.create(user=request.user, title=title)
 
-            Study material:
-            {raw_text}
-            """
-            response = client.chat.completions.create(
-                model="gpt-4o",
-                messages=[
-                    {"role": "system", "content": "You are a helpful study assistant."},
-                    {"role": "user", "content": prompt}
-                ],
-                temperature=0.7,
-                max_tokens=500
+        for f in files:
+            filename = default_storage.save(f"uploaded_files/{slugify(f.name)}", f)
+            UploadedFile.objects.create(
+                cram_hub=hub,
+                file=filename,
+                original_filename=f.name
             )
-            # Convert Markdown → HTML
-            summary_raw = response.choices[0].message.content
-            summary = markdown.markdown(summary_raw)
 
-    return render(request, "cram_app/cram_sheet.html", {
-        "summary": summary
-    })
+        return redirect("cram_hub_dashboard", hub_id=hub.id)
 
-@login_required
-def save_cram_sheet(request):
-    if request.method == "POST":
-        title = request.POST.get("title", "Untitled")
-        content = request.POST.get("content")
-        CramSheet.objects.create(user=request.user, title=title, content=content)
-        return redirect('my_cram_sheets')
-
-@login_required
-def my_cram_sheets(request):
-    cram_sheets = CramSheet.objects.filter(user=request.user)
-    return render(request, 'cram_app/my_cram_sheets.html', {
-        'cram_sheets': cram_sheets
-    })
-
-@login_required
-def cram_sheet_detail(request, sheet_id):
-    sheet = get_object_or_404(CramSheet, id=sheet_id, user=request.user)
-    return render(request, "cram_app/cram_sheet_detail.html", {
-        "sheet": sheet
-    })
-
-@login_required
-def delete_cram_sheet(request, sheet_id):
-    sheet = get_object_or_404(CramSheet, id=sheet_id, user=request.user)
-
-    if request.method == "POST":
-        sheet.delete()
-        return redirect('my_cram_sheets')
+    return render(request, "cram_app/create_cram_hub.html")
 
 @login_required
 def generate_questions(request, sheet_id):
@@ -159,102 +116,3 @@ def generate_questions(request, sheet_id):
             return HttpResponseBadRequest(f"Something went wrong: {e}")
 
     return redirect("view_questions", sheet_id=sheet.id)
-
-
-@login_required
-def view_questions(request, sheet_id):
-    sheet = get_object_or_404(CramSheet, id=sheet_id, user=request.user)
-    questions = sheet.questions.all()
-
-    return render(request, "cram_app/view_questions.html", {
-        "sheet": sheet,
-        "questions": questions
-    })
-
-@login_required
-def take_quiz(request, sheet_id):
-    sheet = get_object_or_404(CramSheet, id=sheet_id, user=request.user)
-    questions = sheet.questions.all()
-
-    question_data = []
-    for q in questions:
-        question_data.append({
-            "question_text": q.question_text,
-            "correct_answer": q.correct_answer,
-            "wrong_answers": q.wrong_answers,
-        })
-
-    return render(request, "cram_app/quiz.html", {
-        "cram_sheet": sheet,
-        "questions": question_data  # ✅ serialized
-    })
-
-@login_required
-def edit_question(request, question_id):
-    question = get_object_or_404(TestQuestion, id=question_id, cram_sheet__user=request.user)
-
-    if request.method == "POST":
-        form = EditTestQuestionForm(request.POST, instance=question)
-        if form.is_valid():
-            form.save()
-            return redirect("view_questions", sheet_id=question.cram_sheet.id)
-    else:
-        form = EditTestQuestionForm(instance=question)
-
-    return render(request, "cram_app/edit_question.html", {
-        "form": form,
-        "question": question
-    })
-
-@login_required
-def add_question(request, sheet_id):
-    sheet = get_object_or_404(CramSheet, id=sheet_id, user=request.user)
-
-    if request.method == "POST":
-        form = TestQuestionForm(request.POST)
-        if form.is_valid():
-            question = form.save(commit=False)
-            question.cram_sheet = sheet
-
-            # Generate wrong answers using GPT
-            prompt = f"""
-            Generate 3 wrong multiple-choice answers for the following question and its correct answer.
-            Do not include the correct answer in the list.
-
-            Question: {question.question_text}
-            Correct Answer: {question.correct_answer}
-
-            Return just a JSON list, e.g.:
-            ["Wrong Answer 1", "Wrong Answer 2", "Wrong Answer 3"]
-            """
-
-            try:
-                response = client.chat.completions.create(
-                    model="gpt-4o",
-                    messages=[
-                        {"role": "system", "content": "You are a helpful quiz assistant."},
-                        {"role": "user", "content": prompt}
-                    ],
-                    temperature=0.7,
-                    max_tokens=200
-                )
-
-                content = response.choices[0].message.content.strip()
-                if content.startswith("```"):
-                    content = content.strip("```")
-                    content = content.replace("json", "", 1).strip()
-
-                question.wrong_answers = json.loads(content)
-                question.save()
-                return redirect("view_questions", sheet_id=sheet.id)
-
-            except Exception as e:
-                return HttpResponseBadRequest(f"Failed to generate wrong answers: {e}")
-
-    else:
-        form = TestQuestionForm()
-
-    return render(request, "cram_app/add_question.html", {
-        "form": form,
-        "sheet": sheet
-    })
