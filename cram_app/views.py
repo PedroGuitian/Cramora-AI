@@ -1,5 +1,5 @@
 from openai import OpenAI
-import os
+import os, json
 from django.contrib.auth.forms import UserCreationForm
 from django.contrib.auth import login
 from django.shortcuts import render, redirect, get_object_or_404
@@ -9,6 +9,7 @@ from django.http import JsonResponse, HttpResponseBadRequest
 from django.core.serializers.json import DjangoJSONEncoder
 from django.core.files.storage import default_storage
 from django.utils.text import slugify
+from .models import CramHub, UploadedFile, CramSheet, TestQuestion
 
 client = OpenAI(api_key=os.getenv("OPENAI_API_KEY"))
 
@@ -31,6 +32,13 @@ def signup_view(request):
 
 def home(request):
     return render(request, "cram_app/home.html")
+
+@login_required
+def cram_hub_dashboard(request, hub_id):
+    hub = get_object_or_404(CramHub, id=hub_id, user=request.user)
+    return render(request, "cram_app/cram_hub_dashboard.html", {
+        "hub": hub
+    })
 
 @login_required
 def create_cram_hub(request):
@@ -58,61 +66,106 @@ def create_cram_hub(request):
     return render(request, "cram_app/create_cram_hub.html")
 
 @login_required
-def generate_questions(request, sheet_id):
-    sheet = get_object_or_404(CramSheet, id=sheet_id, user=request.user)
+def generate_cram_sheet(request, hub_id):
+    hub = get_object_or_404(CramHub, id=hub_id, user=request.user)
+    files = hub.files.all()
+    full_text = ""
 
-    if request.method == "POST":
-        prompt = f"""
-        Generate 5 multiple-choice quiz questions based on the following cram sheet. 
-        Each question should have a "question", a "correct_answer", and a list of exactly three "wrong_answers".
+    for file in files:
+        with file.file.open("r") as f:
+            full_text += f.read() + "\n"
 
-        Return the questions in JSON format like this:
+    prompt = f"""
+        You are a helpful study assistant. Summarize the following study material into a structured and compact 1-page cram sheet.
+
+        Format:
+        ## Overview
+        ## Key Areas to Study
+        ## Important Definitions
+        ## Key Facts or Concepts
+        ## Final Tips (Optional)
+
+        Rules:
+        - Do not use quotation marks
+        - Avoid extra spacing or blank lines
+        - Use markdown formatting only
+
+        Study material:
+        {full_text}
+    """
+
+    response = client.chat.completions.create(
+        model="gpt-4o",
+        messages=[
+            {"role": "system", "content": "You are a helpful study assistant."},
+            {"role": "user", "content": prompt}
+        ],
+        temperature=0.7,
+        max_tokens=700
+    )
+
+    content = response.choices[0].message.content.strip()
+    cram_sheet = CramSheet.objects.create(
+        cram_hub=hub,
+        title=f"Cram Sheet - {hub.title}",
+        content=content
+    )
+
+    return redirect("cram_hub_dashboard", hub_id=hub.id)
+
+@login_required
+def generate_test_questions(request, hub_id):
+    hub = get_object_or_404(CramHub, id=hub_id, user=request.user)
+    files = hub.files.all()
+    full_text = ""
+
+    for file in files:
+        with file.file.open("r") as f:
+            full_text += f.read() + "\n"
+
+    prompt = f"""
+        Generate 5 multiple-choice questions based on this study material.
+        Each question should include:
+        - question
+        - correct_answer
+        - wrong_answers (3 total)
+
+        Return in JSON format like this:
         [
           {{
-            "question": "What does CPU stand for?",
-            "correct_answer": "Central Processing Unit",
-            "wrong_answers": ["Computer Performance Unit", "Central Performance Utility", "Compute Processor Unit"]
+            "question": "...",
+            "correct_answer": "...",
+            "wrong_answers": ["...", "...", "..."]
           }},
           ...
         ]
 
-        Cram Sheet:
-        {sheet.content}
-        """
-        try:
-            response = client.chat.completions.create(
-                model="gpt-4o",
-                messages=[
-                    {"role": "system", "content": "You are a quiz generator AI."},
-                    {"role": "user", "content": prompt}
-                ],
-                temperature=0.7,
-                max_tokens=1000
-            )
+        Study material:
+        {full_text}
+    """
 
-            content = response.choices[0].message.content.strip()
+    response = client.chat.completions.create(
+        model="gpt-4o",
+        messages=[
+            {"role": "system", "content": "You are a quiz generator AI."},
+            {"role": "user", "content": prompt}
+        ],
+        temperature=0.7,
+        max_tokens=1500
+    )
 
-            # Remove ```json or ``` if present
-            if content.startswith("```"):
-                content = content.strip("`")
-                content = content.replace("json", "", 1).strip()
+    content = response.choices[0].message.content.strip()
+    if content.startswith("```"):
+        content = content.strip("`").replace("json", "").strip()
 
-            questions = json.loads(content)
+    questions = json.loads(content)
 
-            for q in questions:
-                if not TestQuestion.objects.filter(cram_sheet=sheet, question_text=q["question"]).exists():
-                    TestQuestion.objects.create(
-                        cram_sheet=sheet,
-                        question_text=q["question"],
-                        correct_answer=q["correct_answer"],
-                        wrong_answers=q["wrong_answers"]
-                    )
+    for q in questions:
+        TestQuestion.objects.create(
+            cram_hub=hub,
+            question_text=q["question"],
+            correct_answer=q["correct_answer"],
+            wrong_answers=q["wrong_answers"]
+        )
 
-            return redirect("view_questions", sheet_id=sheet.id)
-
-        except json.JSONDecodeError:
-            return HttpResponseBadRequest("Failed to parse question JSON.")
-        except Exception as e:
-            return HttpResponseBadRequest(f"Something went wrong: {e}")
-
-    return redirect("view_questions", sheet_id=sheet.id)
+    return redirect("cram_hub_dashboard", hub_id=hub.id)

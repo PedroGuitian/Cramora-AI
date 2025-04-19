@@ -9,70 +9,34 @@
     <p style="color: red;">{{ error }}</p>
   {% endif %}
 
-  <form method="post" enctype="multipart/form-data" id="uploadForm">
+  <form method="post" enctype="multipart/form-data" id="hub-form">
     {% csrf_token %}
 
     <label for="files">Upload Notes or Study Files:</label><br>
-    <div id="dropzone" class="dropzone">
-      <p>Drag and drop files here or click to upload +</p>
-      <input type="file" id="files" name="files" multiple required style="display:none;">
-    </div><br>
+    <div class="drop-zone" id="dropZone">
+      <p>Drag and drop files here or click to upload</p>
+      <input type="file" name="files" multiple required style="display: none;">
+    </div>
 
-    <input type="hidden" id="hubTitle" name="title">
-    <button type="button" onclick="openModal()">Upload & Create Hub</button>
+    <h4 id="uploadedFilesHeader" style="display: none; margin-top: 15px;">Uploaded Files:</h4>
+    <ul id="file-list" class="ul_no_bullets" style="margin-top: 10px;"></ul>
+
+    <input type="hidden" name="title" id="hub-name-hidden">
+    <button type="button" id="openModal">Upload & Create Hub</button>
   </form>
 
-  <div id="titleModal" class="modal-overlay" style="display:none;">
+  <!-- Modal -->
+  <div id="hubNameModal" class="modal-overlay" style="display: none;">
     <div class="modal">
       <h3>Name Your Cram Hub</h3>
-      <input type="text" id="modalInput" placeholder="Enter hub title..." style="width: 100%; padding: 8px; border-radius: 6px; border: 1px solid #ccc;"><br><br>
-      <button onclick="submitWithTitle()">Submit</button>
-      <button onclick="closeModal()" style="margin-left: 10px;">Cancel</button>
+      <input type="text" id="hub-name-input" placeholder="Enter hub title..." style="width: 100%; padding: 8px; border-radius: 6px; border: 1px solid #ccc;"><br><br>
+      <button id="submitHubBtn">Submit</button>
+      <button id="closeModal" style="margin-left: 10px;">Cancel</button>
     </div>
   </div>
 
-  <script>
-    const dropzone = document.getElementById("dropzone");
-    const fileInput = document.getElementById("files");
-
-    dropzone.addEventListener("click", () => fileInput.click());
-
-    dropzone.addEventListener("dragover", (e) => {
-      e.preventDefault();
-      dropzone.classList.add("highlight");
-    });
-
-    dropzone.addEventListener("dragleave", () => {
-      dropzone.classList.remove("highlight");
-    });
-
-    dropzone.addEventListener("drop", (e) => {
-      e.preventDefault();
-      dropzone.classList.remove("highlight");
-      fileInput.files = e.dataTransfer.files;
-    });
-
-    function openModal() {
-      document.getElementById("titleModal").style.display = "flex";
-    }
-
-    function closeModal() {
-      document.getElementById("titleModal").style.display = "none";
-    }
-
-    function submitWithTitle() {
-      const title = document.getElementById("modalInput").value;
-      if (title.trim() !== '') {
-        document.getElementById("hubTitle").value = title;
-        document.getElementById("uploadForm").submit();
-      } else {
-        alert("Please enter a title.");
-      }
-    }
-  </script>
-
   <style>
-    .dropzone {
+    .drop-zone {
       border: 2px dashed #007bff;
       border-radius: 8px;
       padding: 20px;
@@ -81,16 +45,125 @@
       background-color: #f9f9f9;
       transition: background-color 0.3s ease;
     }
-    .dropzone.highlight {
+
+    .drop-zone.drag-over {
       background-color: #e6f2ff;
+    }
+
+    .modal-overlay {
+      position: fixed;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 100%;
+      background: rgba(0, 0, 0, 0.4);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      z-index: 999;
+    }
+
+    .modal {
+      background: white;
+      padding: 2rem;
+      border-radius: 12px;
+      max-width: 400px;
+      width: 100%;
+      box-shadow: 0 10px 30px rgba(0, 0, 0, 0.2);
+      text-align: center;
+    }
+
+    .ul_no_bullets {
+      list-style-type: none;
+      padding-left: 0;
+      font-size: 0.9rem;
     }
   </style>
 
-  {% if hub_created %}
-    <div style="margin-top: 20px;">
-      <h3>Next Steps:</h3>
-      <a href="{% url 'generate_cram_sheet' hub_id=hub.id %}" class="button">Generate Cram Sheet</a>
-      <a href="{% url 'generate_test_questions' hub_id=hub.id %}" class="button">Generate Test Questions</a>
-    </div>
-  {% endif %}
+  <script>
+    document.addEventListener("DOMContentLoaded", function () {
+      const dropZone = document.getElementById("dropZone");
+      const fileInput = document.querySelector("input[name='files']");
+      const fileList = document.getElementById("file-list");
+      const uploadedFilesHeader = document.getElementById("uploadedFilesHeader");
+      const openModalBtn = document.getElementById("openModal");
+      const modal = document.getElementById("hubNameModal");
+      const closeModalBtn = document.getElementById("closeModal");
+      const hubNameInput = document.getElementById("hub-name-input");
+      const actualForm = document.getElementById("hub-form");
+
+      dropZone.addEventListener("click", () => fileInput.click());
+
+      dropZone.addEventListener("dragover", (e) => {
+        e.preventDefault();
+        dropZone.classList.add("drag-over");
+      });
+
+      dropZone.addEventListener("dragleave", () => {
+        dropZone.classList.remove("drag-over");
+      });
+
+      dropZone.addEventListener("drop", (e) => {
+        e.preventDefault();
+        dropZone.classList.remove("drag-over");
+
+        const files = Array.from(e.dataTransfer.files);
+        fileInput.files = createFileList(files);
+        updateFileList(files);
+      });
+
+      fileInput.addEventListener("change", () => {
+        updateFileList(Array.from(fileInput.files));
+      });
+
+      function updateFileList(files) {
+        fileList.innerHTML = "";
+
+        if (files.length === 0) {
+          uploadedFilesHeader.style.display = "none";
+          return;
+        }
+
+        uploadedFilesHeader.style.display = "block";
+
+        files.forEach(file => {
+          const li = document.createElement("li");
+          const link = document.createElement("a");
+          link.textContent = file.name;
+          link.href = URL.createObjectURL(file);
+          link.target = "_blank";
+          link.style.color = "#007bff";
+          link.style.textDecoration = "underline";
+          li.appendChild(link);
+          fileList.appendChild(li);
+        });
+      }
+
+      function createFileList(files) {
+        const dataTransfer = new DataTransfer();
+        files.forEach(file => dataTransfer.items.add(file));
+        return dataTransfer.files;
+      }
+
+      openModalBtn.addEventListener("click", function () {
+        if (!fileInput.files.length) {
+          alert("Please select or drop at least one file first.");
+          return;
+        }
+        modal.style.display = "flex";
+      });
+
+      closeModalBtn.addEventListener("click", () => {
+        modal.style.display = "none";
+      });
+
+      document.getElementById("submitHubBtn").addEventListener("click", function () {
+        const hubName = hubNameInput.value.trim();
+        if (hubName) {
+          document.getElementById("hub-name-hidden").value = hubName;
+          actualForm.submit();
+        }
+      });
+    });
+  </script>
 {% endblock %}
