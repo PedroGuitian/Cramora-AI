@@ -1,24 +1,103 @@
 {% extends 'cram_app/layout.html' %}
 
-{% block title %}Cram Hub Dashboard{% endblock %}
+{% block title %}{{ hub.title }} - Dashboard{% endblock %}
 
 {% block content %}
-  <h2>{{ hub.title }}</h2>
-  <p><strong>Created:</strong> {{ hub.created_at|date:"F j, Y, g:i a" }}</p>
+  <h2>{{ hub.title }} Dashboard</h2>
 
-  <h3>Uploaded Files</h3>
-  {% if hub.files.all %}
-    <ul>
-      {% for file in hub.files.all %}
-        <li>{{ file.original_filename }}</li>
-      {% endfor %}
-    </ul>
-  {% else %}
-    <p>No files uploaded yet.</p>
-  {% endif %}
+  <button onclick="openFileModal()">Files</button>
+  <a href="{% url 'generate_cram_sheet' hub.id %}" class="button-link" style="margin-left: 10px;">Generate Cram Sheet</a>
+  <a href="{% url 'generate_test_questions' hub.id %}" class="button-link" style="margin-left: 10px;">Generate Test Questions</a>
 
-  <div style="margin-top: 20px;">
-    <a href="{% url 'generate_cram_sheet' hub_id=hub.id %}" class="button">Generate Cram Sheet</a>
-    <a href="{% url 'generate_test_questions' hub_id=hub.id %}" class="button">Generate Test Questions</a>
+  <!-- FILE MODAL -->
+  <div id="fileModal" class="modal-overlay" style="display:none;">
+    <div class="modal">
+      <h3>Uploaded Files</h3>
+      <ul id="fileList" class="ul_no_bullets" style="text-align: left;">
+        {% for f in hub.files.all %}
+          <li><a href="{{ f.file.url }}" target="_blank" style="color: #007bff; text-decoration: underline;">{{ f.original_filename }}</a></li>
+        {% empty %}
+          <li>No files uploaded yet.</li>
+        {% endfor %}
+      </ul>
+
+      <hr style="margin: 20px 0;">
+
+      <h4>Files to Upload (Not Yet Submitted)</h4>
+      <ul id="pendingFilesList" class="ul_no_bullets" style="margin-bottom: 10px;"></ul>
+
+      <form method="post" action="{% url 'add_files_to_hub' hub.id %}" enctype="multipart/form-data" id="uploadMoreForm">
+        {% csrf_token %}
+        <div id="dropzone" class="dropzone">
+          <p>Drag and drop more files here or click to upload</p>
+          <input type="file" name="files" multiple style="display:none;" id="moreFiles">
+        </div>
+        <br>
+        <button type="submit">Submit</button>
+        <button type="button" onclick="closeFileModal()" style="margin-left: 10px;">Close</button>
+      </form>
+    </div>
   </div>
+
+  <script>
+    function openFileModal() {
+      document.getElementById("fileModal").style.display = "flex";
+    }
+
+    function closeFileModal() {
+      document.getElementById("fileModal").style.display = "none";
+    }
+
+    const dropzone = document.getElementById("dropzone");
+    const fileInput = document.getElementById("moreFiles");
+    const pendingFilesList = document.getElementById("pendingFilesList");
+
+    dropzone.addEventListener("click", () => fileInput.click());
+
+    dropzone.addEventListener("dragover", (e) => {
+      e.preventDefault();
+      dropzone.classList.add("highlight");
+    });
+
+    dropzone.addEventListener("dragleave", () => {
+      dropzone.classList.remove("highlight");
+    });
+
+    dropzone.addEventListener("drop", (e) => {
+      e.preventDefault();
+      dropzone.classList.remove("highlight");
+      fileInput.files = e.dataTransfer.files;
+      updatePendingFiles(fileInput.files);
+    });
+
+    fileInput.addEventListener("change", () => {
+      updatePendingFiles(fileInput.files);
+    });
+
+    function updatePendingFiles(fileList) {
+      pendingFilesList.innerHTML = "";
+      const files = Array.from(fileList);
+
+      if (files.length === 0) {
+        const li = document.createElement("li");
+        li.textContent = "No new files selected.";
+        pendingFilesList.appendChild(li);
+        return;
+      }
+
+      files.forEach(file => {
+        const li = document.createElement("li");
+        const link = document.createElement("a");
+
+        link.href = URL.createObjectURL(file);
+        link.target = "_blank";
+        link.textContent = file.name;
+        link.style.color = "#007bff";
+        link.style.textDecoration = "underline";
+
+        li.appendChild(link);
+        pendingFilesList.appendChild(li);
+      });
+    }
+  </script>
 {% endblock %}

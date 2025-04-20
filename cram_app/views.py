@@ -124,7 +124,7 @@ def generate_test_questions(request, hub_id):
             full_text += f.read() + "\n"
 
     prompt = f"""
-        Generate 5 multiple-choice questions based on this study material.
+        Generate 10 multiple-choice questions based on this study material.
         Each question should include:
         - question
         - correct_answer
@@ -169,3 +169,25 @@ def generate_test_questions(request, hub_id):
         )
 
     return redirect("cram_hub_dashboard", hub_id=hub.id)
+
+@login_required
+def my_cram_hubs(request):
+    hubs = CramHub.objects.filter(user=request.user).order_by('-created_at')
+    return render(request, 'cram_app/my_cram_hubs.html', {
+        'hubs': hubs
+    })
+
+@login_required
+def add_files_to_hub(request, hub_id):
+    hub = get_object_or_404(CramHub, id=hub_id, user=request.user)
+
+    if request.method == "POST":
+        files = request.FILES.getlist("files")
+        for f in files:
+            filename = default_storage.save(f"uploaded_files/{slugify(f.name)}", f)
+            UploadedFile.objects.create(
+                cram_hub=hub,
+                file=filename,
+                original_filename=f.name
+            )
+        return redirect("cram_hub_dashboard", hub_id=hub.id)
