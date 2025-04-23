@@ -6,10 +6,25 @@
   <div class="container-edit-question">
     <h2>Edit Question</h2>
     <form method="post" class="form-wrapper">
-        {% csrf_token %}
-        {{ form.as_p }}
-        <button type="submit">Save Changes</button>
-        <a href="{% url 'cram_hub_dashboard' question.cram_hub.id %}" class="button-link" style="margin-left: 10px;">Back</a>
-      </form>
+      {% csrf_token %}
+
+      <label for="{{ form.question_text.id_for_label }}">Question</label>
+      {{ form.question_text }}
+
+      <label for="{{ form.correct_answer.id_for_label }}">Correct Answer</label>
+      {{ form.correct_answer }}
+
+      <label>Wrong Answers</label>
+      {{ form.wrong1 }}
+      {{ form.wrong2 }}
+      {{ form.wrong3 }}
+
+      {% if form.non_field_errors %}
+        <p style="color: red;">{{ form.non_field_errors }}</p>
+      {% endif %}
+
+      <button type="submit">Save Changes</button>
+      <a href="{% url 'cram_hub_dashboard' question.cram_hub.id %}" class="button-link" style="margin-left: 10px;">Back</a>
+    </form>
   </div>
 {% endblock %}
