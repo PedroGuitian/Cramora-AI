@@ -1,5 +1,7 @@
-from openai import OpenAI
 import os, json
+import tiktoken
+import fitz
+from openai import OpenAI
 from django.contrib.auth.forms import UserCreationForm
 from django.contrib.auth import login
 from django.shortcuts import render, redirect, get_object_or_404
@@ -72,8 +74,22 @@ def generate_cram_sheet(request, hub_id):
     full_text = ""
 
     for file in files:
-        with file.file.open("r") as f:
-            full_text += f.read() + "\n"
+        try:
+            ext = os.path.splitext(file.original_filename)[1].lower()
+
+            if ext == ".pdf":
+                print(f"📄 Extracting from PDF: {file.original_filename}")
+                with file.file.open("rb") as f:
+                    doc = fitz.open(stream=f.read(), filetype="pdf")
+                    for page in doc:
+                        full_text += page.get_text()
+            else:
+                with file.file.open("rb") as f:
+                    content = f.read()
+                    full_text += content.decode("utf-8", errors="ignore") + "\n"
+
+        except Exception as e:
+            print(f"❌ Could not process {file.original_filename}: {e}")
 
     prompt = f"""
         You are a helpful study assistant. Summarize the following study material into a structured and compact 1-page cram sheet.
@@ -113,6 +129,13 @@ def generate_cram_sheet(request, hub_id):
 
     return redirect("cram_hub_dashboard", hub_id=hub.id)
 
+def estimate_tokens(text):
+    try:
+        enc = tiktoken.encoding_for_model("gpt-4")
+        return len(enc.encode(text))
+    except Exception:
+        return int(len(text) / 4)  # fallback
+
 @login_required
 def generate_test_questions(request, hub_id):
     hub = get_object_or_404(CramHub, id=hub_id, user=request.user)
@@ -120,8 +143,29 @@ def generate_test_questions(request, hub_id):
     full_text = ""
 
     for file in files:
-        with file.file.open("r") as f:
-            full_text += f.read() + "\n"
+        try:
+            ext = os.path.splitext(file.original_filename)[1].lower()
+
+            if ext == ".pdf":
+                with file.file.open("rb") as f:
+                    doc = fitz.open(stream=f.read(), filetype="pdf")
+                    for page in doc:
+                        full_text += page.get_text()
+            else:
+                with file.file.open("rb") as f:
+                    content = f.read()
+                    try:
+                        full_text += content.decode("utf-8", errors="ignore") + "\n"
+                    except UnicodeDecodeError:
+                        full_text += content.decode("latin-1") + "\n"
+
+        except Exception:
+            continue  # skip unreadable files silently
+
+    # ✅ Limit input to ~10k tokens
+    max_tokens = 10000
+    if estimate_tokens(full_text) > max_tokens:
+        full_text = full_text[:40000]  # ~10k tokens (approx)
 
     prompt = f"""
         Generate 10 multiple-choice questions based on this study material.
@@ -144,31 +188,43 @@ def generate_test_questions(request, hub_id):
         {full_text}
     """
 
-    response = client.chat.completions.create(
-        model="gpt-4o",
-        messages=[
-            {"role": "system", "content": "You are a quiz generator AI."},
-            {"role": "user", "content": prompt}
-        ],
-        temperature=0.7,
-        max_tokens=1500
-    )
-
-    content = response.choices[0].message.content.strip()
-    if content.startswith("```"):
-        content = content.strip("`").replace("json", "").strip()
-
-    questions = json.loads(content)
-
-    for q in questions:
-        TestQuestion.objects.create(
-            cram_hub=hub,
-            question_text=q["question"],
-            correct_answer=q["correct_answer"],
-            wrong_answers=q["wrong_answers"]
+    try:
+        response = client.chat.completions.create(
+            model="gpt-4o",
+            messages=[
+                {"role": "system", "content": "You are a quiz generator AI."},
+                {"role": "user", "content": prompt}
+            ],
+            temperature=0.7,
+            max_tokens=1500
         )
 
-    return redirect("cram_hub_dashboard", hub_id=hub.id)
+        content = response.choices[0].message.content.strip()
+
+        if content.startswith("```"):
+            content = content.strip("`").replace("json", "").strip()
+
+        if not content or not content.startswith("["):
+            return HttpResponseBadRequest("Invalid AI response. Please check your input files and try again.")
+
+        questions = json.loads(content)
+
+        for q in questions:
+            TestQuestion.objects.create(
+                cram_hub=hub,
+                question_text=q["question"],
+                correct_answer=q["correct_answer"],
+                wrong_answers=q["wrong_answers"]
+            )
+
+        return render(request, "cram_app/cram_hub_dashboard.html", {
+            "hub": hub,
+            "questions": hub.questions.all(),
+            "show_questions": True
+        })
+
+    except Exception:
+        return HttpResponseBadRequest("Something went wrong while generating test questions. Please try again.")
 
 @login_required
 def my_cram_hubs(request):
@@ -191,3 +247,21 @@ def add_files_to_hub(request, hub_id):
                 original_filename=f.name
             )
         return redirect("cram_hub_dashboard", hub_id=hub.id)
+
+@login_required
+def edit_question(request, question_id):
+    question = get_object_or_404(TestQuestion, id=question_id, cram_hub__user=request.user)
+
+    if request.method == "POST":
+        form = EditTestQuestionForm(request.POST, instance=question)
+        if form.is_valid():
+            form.save()
+            return redirect("cram_hub_dashboard", hub_id=question.cram_hub.id)
+    else:
+        form = EditTestQuestionForm(instance=question)
+
+    return render(request, "cram_app/edit_question.html", {
+        "form": form,
+        "question": question
+    })
+

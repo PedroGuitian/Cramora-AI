@@ -5,11 +5,35 @@
 {% block content %}
   <h2>{{ hub.title }} Dashboard</h2>
 
-  <button onclick="openFileModal()">Files</button>
+  <!-- Action Buttons -->
+  <button onclick="openFileModal()">View Uploaded Files</button>
   <a href="{% url 'generate_cram_sheet' hub.id %}" class="button-link" style="margin-left: 10px;">Generate Cram Sheet</a>
   <a href="{% url 'generate_test_questions' hub.id %}" class="button-link" style="margin-left: 10px;">Generate Test Questions</a>
 
-  <!-- FILE MODAL -->
+  <!-- Generated Questions -->
+  {% if show_questions %}
+    <hr>
+    <h3>Generated Questions</h3>
+    <ul class="ul_no_bullets">
+      {% for q in questions %}
+        <li style="margin-bottom: 10px;">
+          <strong>Q{{ forloop.counter }}:</strong> {{ q.question_text }}<br>
+          <strong>Correct Answer:</strong> {{ q.correct_answer }}<br>
+          <strong>Wrong Answers:</strong>
+          <ul style="margin-left: 20px;">
+            {% for wrong in q.wrong_answers %}
+              <li>{{ wrong }}</li>
+            {% endfor %}
+          </ul>
+          <a href="{% url 'edit_question' q.id %}" class="button-link">Edit</a>
+        </li>
+      {% empty %}
+        <li>No questions generated yet.</li>
+      {% endfor %}
+    </ul>
+  {% endif %}
+
+  <!-- File Modal -->
   <div id="fileModal" class="modal-overlay" style="display:none;">
     <div class="modal">
       <h3>Uploaded Files</h3>
@@ -39,6 +63,7 @@
     </div>
   </div>
 
+  <!-- Script -->
   <script>
     function openFileModal() {
       document.getElementById("fileModal").style.display = "flex";
