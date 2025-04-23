@@ -257,3 +257,70 @@ a.button-link:hover {
   background-color: #0056b3;
   transform: translateY(-2px);
 }
+
+.question-box {
+  background-color: #f0f2f5;
+  padding: 20px;
+  border-radius: 10px;
+  margin-bottom: 20px;
+  box-shadow: 0 2px 6px rgba(0, 0, 0, 0.05);
+}
+
+.question-box p {
+  margin: 5px 0;
+}
+
+.question-list ul {
+  padding-left: 20px;
+  margin-top: 5px;
+  margin-bottom: 10px;
+}
+
+.edit-link {
+  all: unset;
+  margin-right: 10px;
+  display: inline-block;
+  color: #007bff;
+  font-weight: 500;
+  cursor: pointer;
+  text-decoration: none;
+  background-color: transparent;  /* 👈 ensures no background */
+  border: none;
+  box-shadow: none;
+  padding: 0;
+  transition: color 0.3s ease, text-decoration 0.3s ease, transform 0.2s ease;
+}
+
+.edit-link:hover,
+.edit-link:focus {
+  color: #0056b3;
+  text-decoration: underline;
+  transform: translateY(-2px);
+  background-color: transparent;  /* 👈 prevents hover background */
+  box-shadow: none;
+  outline: none;
+}
+
+.delete-link {
+  all: unset;
+  display: inline-block;
+  color: #007bff;  /* color: #c53030; */
+  font-weight: 500;
+  cursor: pointer;
+  text-decoration: none;
+  background-color: transparent;  /* 👈 ensures no background */
+  border: none;
+  box-shadow: none;
+  padding: 0;
+  transition: color 0.3s ease, text-decoration 0.3s ease, transform 0.2s ease;
+}
+
+.delete-link:hover,
+.delete-link:focus {
+  color: #e63946;
+  text-decoration: underline;
+  transform: translateY(-2px);
+  background-color: transparent;  /* 👈 prevents hover background */
+  box-shadow: none;
+  outline: none;
+}

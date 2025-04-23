@@ -8,29 +8,33 @@
   <!-- Action Buttons -->
   <button onclick="openFileModal()">View Uploaded Files</button>
   <a href="{% url 'generate_cram_sheet' hub.id %}" class="button-link" style="margin-left: 10px;">Generate Cram Sheet</a>
-  <a href="{% url 'generate_test_questions' hub.id %}" class="button-link" style="margin-left: 10px;">Generate Test Questions</a>
+  {% if show_questions %}
+    <a href="{% url 'generate_test_questions' hub.id %}" class="button-link" style="margin-left: 10px;">Generate More Questions</a>
+  {% else %}
+    <a href="{% url 'generate_test_questions' hub.id %}" class="button-link" style="margin-left: 10px;">Generate Questions</a>
+  {% endif %}
 
   <!-- Generated Questions -->
-  {% if show_questions %}
-    <hr>
-    <h3>Generated Questions</h3>
-    <ul class="ul_no_bullets">
-      {% for q in questions %}
-        <li style="margin-bottom: 10px;">
-          <strong>Q{{ forloop.counter }}:</strong> {{ q.question_text }}<br>
-          <strong>Correct Answer:</strong> {{ q.correct_answer }}<br>
-          <strong>Wrong Answers:</strong>
-          <ul style="margin-left: 20px;">
-            {% for wrong in q.wrong_answers %}
-              <li>{{ wrong }}</li>
-            {% endfor %}
-          </ul>
-          <a href="{% url 'edit_question' q.id %}" class="button-link">Edit</a>
-        </li>
-      {% empty %}
-        <li>No questions generated yet.</li>
-      {% endfor %}
-    </ul>
+  {% if hub.questions.exists %}
+  <hr>
+  <h3>Cram Questions</h3>
+  <div class="question-list">
+    {% for q in hub.questions.all %}
+      <div class="question-box">
+        <p><strong>{{ forloop.counter }}.</strong> {{ q.question_text }}</p>
+        <p><strong>Correct Answer:</strong> {{ q.correct_answer }}</p>
+        <div>
+            <a href="{% url 'edit_question' q.id %}" class="edit-link" title="Edit">
+                <i class="fas fa-pen"></i>
+            </a>
+            <form action="{% url 'delete_question' q.id %}" method="post" style="display:inline;">
+                {% csrf_token %}
+                <button type="submit" class="delete-link" title="Delete"><i class="fas fa-trash"></i></button>
+            </form>
+        </div>
+      </div>
+    {% endfor %}
+  </div>
   {% endif %}
 
   <!-- File Modal -->

@@ -14,5 +14,6 @@ urlpatterns = [
     path("cram-hub/<int:hub_id>/generate-cram-sheet/", views.generate_cram_sheet, name="generate_cram_sheet"),
     path("cram-hub/<int:hub_id>/generate-test-questions/", views.generate_test_questions, name="generate_test_questions"),
     path('cram-hub/<int:hub_id>/add-files/', views.add_files_to_hub, name='add_files_to_hub'),
-    path("question/<int:question_id>/edit/", views.edit_question, name="edit_question")
+    path("question/<int:question_id>/edit/", views.edit_question, name="edit_question"),
+    path("question/<int:question_id>/delete/", views.delete_question, name="delete_question")
 ]
