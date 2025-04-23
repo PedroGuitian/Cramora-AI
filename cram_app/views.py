@@ -11,6 +11,7 @@ from django.http import JsonResponse, HttpResponseBadRequest
 from django.core.serializers.json import DjangoJSONEncoder
 from django.core.files.storage import default_storage
 from django.utils.text import slugify
+from django.views.decorators.http import require_POST
 from .models import CramHub, UploadedFile, CramSheet, TestQuestion
 
 client = OpenAI(api_key=os.getenv("OPENAI_API_KEY"))
@@ -39,7 +40,9 @@ def home(request):
 def cram_hub_dashboard(request, hub_id):
     hub = get_object_or_404(CramHub, id=hub_id, user=request.user)
     return render(request, "cram_app/cram_hub_dashboard.html", {
-        "hub": hub
+        "hub": hub,
+        "questions": hub.questions.all(),
+        "show_questions": hub.questions.exists()
     })
 
 @login_required
@@ -209,13 +212,16 @@ def generate_test_questions(request, hub_id):
 
         questions = json.loads(content)
 
+        existing_texts = set(hub.questions.values_list("question_text", flat=True))
+        
         for q in questions:
-            TestQuestion.objects.create(
-                cram_hub=hub,
-                question_text=q["question"],
-                correct_answer=q["correct_answer"],
-                wrong_answers=q["wrong_answers"]
-            )
+            if q["question"] not in existing_texts:
+                TestQuestion.objects.create(
+                    cram_hub=hub,
+                    question_text=q["question"],
+                    correct_answer=q["correct_answer"],
+                    wrong_answers=q["wrong_answers"]
+                )
 
         return render(request, "cram_app/cram_hub_dashboard.html", {
             "hub": hub,
@@ -265,3 +271,10 @@ def edit_question(request, question_id):
         "question": question
     })
 
+@login_required
+@require_POST
+def delete_question(request, question_id):
+    question = get_object_or_404(TestQuestion, id=question_id, cram_hub__user=request.user)
+    hub_id = question.cram_hub.id
+    question.delete()
+    return redirect("cram_hub_dashboard", hub_id=hub_id)
