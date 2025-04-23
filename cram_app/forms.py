@@ -11,8 +11,8 @@ class TestQuestionForm(forms.ModelForm):
 
 class EditTestQuestionForm(forms.ModelForm):
     wrong1 = forms.CharField(label="Wrong Answer 1", max_length=255, required=True)
-    wrong2 = forms.CharField(label="Wrong Answer 2", max_length=255, required=True)
-    wrong3 = forms.CharField(label="Wrong Answer 3", max_length=255, required=True)
+    wrong2 = forms.CharField(label="Wrong Answer 2", max_length=255, required=False)
+    wrong3 = forms.CharField(label="Wrong Answer 3", max_length=255, required=False)
 
     class Meta:
         model = TestQuestion
@@ -22,8 +22,13 @@ class EditTestQuestionForm(forms.ModelForm):
         }
 
     def __init__(self, *args, **kwargs):
-        # Load wrong answers into separate fields if instance exists
         super().__init__(*args, **kwargs)
+
+        common_classes = 'form-input-style'
+
+        for field in self.fields:
+            self.fields[field].widget.attrs.update({'class': common_classes})
+
         if self.instance and self.instance.wrong_answers:
             wrongs = self.instance.wrong_answers
             self.fields['wrong1'].initial = wrongs[0] if len(wrongs) > 0 else ''

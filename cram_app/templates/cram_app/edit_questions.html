@@ -3,11 +3,13 @@
 {% block title %}Edit Question{% endblock %}
 
 {% block content %}
-  <h2>Edit Question</h2>
-  <form method="post">
-    {% csrf_token %}
-    {{ form.as_p }}
-    <button type="submit">Save Changes</button>
-    <a href="{% url 'cram_hub_dashboard' question.cram_hub.id %}" class="button-link" style="margin-left: 10px;">Back</a>
-  </form>
+  <div class="container-edit-question">
+    <h2>Edit Question</h2>
+    <form method="post" class="form-wrapper">
+        {% csrf_token %}
+        {{ form.as_p }}
+        <button type="submit">Save Changes</button>
+        <a href="{% url 'cram_hub_dashboard' question.cram_hub.id %}" class="button-link" style="margin-left: 10px;">Back</a>
+      </form>
+  </div>
 {% endblock %}
