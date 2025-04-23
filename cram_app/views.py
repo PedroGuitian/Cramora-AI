@@ -1,6 +1,7 @@
 import os, json
 import tiktoken
 import fitz
+from .forms import TestQuestionForm, EditTestQuestionForm
 from openai import OpenAI
 from django.contrib.auth.forms import UserCreationForm
 from django.contrib.auth import login
@@ -266,7 +267,7 @@ def edit_question(request, question_id):
     else:
         form = EditTestQuestionForm(instance=question)
 
-    return render(request, "cram_app/edit_question.html", {
+    return render(request, "cram_app/edit_questions.html", {
         "form": form,
         "question": question
     })
