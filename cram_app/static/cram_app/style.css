@@ -7,16 +7,17 @@ body {
   padding: 0;
   color: #333;
   line-height: 1.6;
+  padding: 15px;
 }
 
-.container {
-  max-width: 1000px;
+/* .container {
+  max-width: 1200px;
   margin: 40px auto;
   background: white;
   padding: 30px;
   border-radius: 12px;
   box-shadow: 0 8px 30px rgba(0, 0, 0, 0.1);
-}
+} */
 
 header {
   margin-bottom: 30px;
@@ -356,4 +357,23 @@ a.button-link:hover {
   padding: 30px;
   border-radius: 12px;
   box-shadow: 0 8px 30px rgba(0, 0, 0, 0.1);
+}
+
+.center-wrapper {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+}
+
+.log-in-box {
+  background-color: #f0f2f5;
+  max-width: 300px;
+  padding: 30px;
+  border: black 1px solid;
+  border-radius: 12px;
+  box-shadow: 0 8px 30px rgba(0, 0, 0, 0.1);
+}
+/* create-cram-hub.html styling */
+.upload-form-container{
+  background-color: white;
 }

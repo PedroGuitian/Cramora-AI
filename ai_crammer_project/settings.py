@@ -79,8 +79,12 @@ WSGI_APPLICATION = 'ai_crammer_project.wsgi.application'
 
 DATABASES = {
     'default': {
-        'ENGINE': 'django.db.backends.sqlite3',
-        'NAME': BASE_DIR / 'db.sqlite3',
+        'ENGINE': 'django.db.backends.postgresql',
+        'NAME': 'cramora_db',
+        'USER': 'cramora_user',
+        'PASSWORD': 'your_strong_password',  # same one you set earlier
+        'HOST': 'localhost',
+        'PORT': '5432',
     }
 }
 
