@@ -86,7 +86,7 @@ textarea:focus {
 }
 
 button {
-  background-color: #007bff;
+  background-color: #493DC7;
   color: white;
   padding: 12px 20px;
   border: none;
@@ -99,7 +99,7 @@ button {
 }
 
 button:hover {
-  background-color: #0056b3;
+  background-color: #322A88;
   transform: translateY(-2px);
 }
 
@@ -375,5 +375,72 @@ a.button-link:hover {
 }
 /* create-cram-hub.html styling */
 .upload-form-container{
+  display: flex; /* Enable Flexbox */
+  justify-content: center; /* Horizontally center the .drop-zone */
+  flex-direction: column; /* ← Stack children vertically */
+  align-items: center; /* Vertically center the .drop-zone */
   background-color: white;
+  width: 600px;
+  min-height: 350px;
+  padding: 30px;
+  border-radius: 30px;
+  position: relative; /* Ensure other elements can be positioned if needed */
+  margin: auto;
+}
+#hub-form label{
+  font-weight: bold;
+}
+.drop-zone {
+  display: flex; /* Enable Flexbox */
+  justify-content: center; /* Horizontally center the .drop-zone */
+  align-items: center; /* Vertically center the .drop-zone */
+  border: 2px dashed #493DC7;
+  border-radius: 8px;
+  padding: 20px;
+  text-align: center;
+  cursor: pointer;
+  background-color: #f9f9f9;
+  transition: background-color 0.3s ease;
+  width: 500px;
+  height: 200px;
+  margin-top: 20px;
+}
+
+.drop-zone.drag-over {
+  background-color: #e6f2ff;
+}
+
+.drop-zone .upload-icon{
+  font-size: 30px;
+  color: #493DC7;
+}
+
+.modal-overlay {
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  background: rgba(0, 0, 0, 0.4);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  z-index: 999;
+}
+
+.modal {
+  background: white;
+  padding: 2rem;
+  border-radius: 12px;
+  max-width: 400px;
+  width: 100%;
+  box-shadow: 0 10px 30px rgba(0, 0, 0, 0.2);
+  text-align: center;
+}
+
+.ul_no_bullets {
+  list-style-type: none;
+  padding-left: 0;
+  font-size: 0.9rem;
+  margin-top: 10px;
 }
