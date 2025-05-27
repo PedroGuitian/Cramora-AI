@@ -57,9 +57,32 @@ def create_cram_hub(request):
                 "error": "Please provide a title and upload at least one file."
             })
 
+        allowed_types = [
+            "application/pdf",
+            "application/msword",  # .doc
+            "application/vnd.openxmlformats-officedocument.wordprocessingml.document"  # .docx
+        ]
+
+        MAX_TOTAL_SIZE = 25 * 1024 * 1024  # 25 MB in bytes
+
+        total_size = sum(f.size for f in files)
+
+        if tital_size > MAX_TOTAL_SIZE:
+            return render(request, "cram_app/creat_cram_hub.html", {
+                "error": "Toatl file size exceeds 25 MB limit."
+            })
+
+        # Create the hub first
         hub = CramHub.objects.create(user=request.user, title=title)
 
         for f in files:
+            if f.content_type not in allowed_types:
+                # Delete hub if one file fails
+                hub.delete()
+                return render(request, "cram_app/create_cram_hub.html", {
+                    "error": "Only PDF or Word documents are allowed."
+                })
+
             filename = default_storage.save(f"uploaded_files/{slugify(f.name)}", f)
             UploadedFile.objects.create(
                 cram_hub=hub,

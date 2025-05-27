@@ -12,13 +12,19 @@
   <div class="upload-form-container">
     <form method="post" enctype="multipart/form-data" id="hub-form">
       {% csrf_token %}
-      <label for="files">Upload Notes or Study Files:</label><br>
+      <label for="files">Upload Notes or Study Files:</label>
+      <br>
       <div class="drop-zone" id="dropZone">
-        <p>Drag and drop files here or click to upload</p>
-        <input type="file" name="files" multiple required style="display: none;">
+        <div class="drop-zone-content">
+          <i class="fas fa-cloud-upload-alt upload-icon"></i>
+          <p>Drag and drop your files or click here to upload</p>
+          <p>Maximum size: 25MB</p>
+          <input type="file" name="files" accept=".pdf,.doc,.docx,.ppt,.pptx,.txt" multiple required style="display: none;">
+        </div>
       </div>
+      <h4>Supported formats: PDF, DOC, DOCX, PPT, PPTX, TXT</h4>
       <h4 id="uploadedFilesHeader" style="display: none; margin-top: 15px;">Uploaded Files:</h4>
-      <ul id="file-list" class="ul_no_bullets" style="margin-top: 10px;"></ul>
+      <ul id="file-list" class="ul_no_bullets"></ul>
       <input type="hidden" name="title" id="hub-name-hidden">
       <button type="button" id="openModal">Upload & Create Hub</button>
     </form>
@@ -34,51 +40,6 @@
     </div>
   </div>
 
-  <style>
-    .drop-zone {
-      border: 2px dashed #007bff;
-      border-radius: 8px;
-      padding: 20px;
-      text-align: center;
-      cursor: pointer;
-      background-color: #f9f9f9;
-      transition: background-color 0.3s ease;
-    }
-
-    .drop-zone.drag-over {
-      background-color: #e6f2ff;
-    }
-
-    .modal-overlay {
-      position: fixed;
-      top: 0;
-      left: 0;
-      width: 100%;
-      height: 100%;
-      background: rgba(0, 0, 0, 0.4);
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      z-index: 999;
-    }
-
-    .modal {
-      background: white;
-      padding: 2rem;
-      border-radius: 12px;
-      max-width: 400px;
-      width: 100%;
-      box-shadow: 0 10px 30px rgba(0, 0, 0, 0.2);
-      text-align: center;
-    }
-
-    .ul_no_bullets {
-      list-style-type: none;
-      padding-left: 0;
-      font-size: 0.9rem;
-    }
-  </style>
-
   <script>
     document.addEventListener("DOMContentLoaded", function () {
       const dropZone = document.getElementById("dropZone");
@@ -90,45 +51,69 @@
       const closeModalBtn = document.getElementById("closeModal");
       const hubNameInput = document.getElementById("hub-name-input");
       const actualForm = document.getElementById("hub-form");
-
+  
+      let allFiles = []; // store all files in a separate array
+  
       dropZone.addEventListener("click", () => fileInput.click());
-
+  
       dropZone.addEventListener("dragover", (e) => {
         e.preventDefault();
         dropZone.classList.add("drag-over");
       });
-
+  
       dropZone.addEventListener("dragleave", () => {
         dropZone.classList.remove("drag-over");
       });
-
+  
       dropZone.addEventListener("drop", (e) => {
         e.preventDefault();
         dropZone.classList.remove("drag-over");
 
-        const files = Array.from(e.dataTransfer.files);
-        fileInput.files = createFileList(files);
-        updateFileList(files);
+        const droppedFiles = Array.from(e.dataTransfer.files);
+        const newFiles = droppedFiles.filter(newFile =>
+          !allFiles.some(existingFile =>
+            existingFile.name === newFile.name && existingFile.size === newFile.size
+          )
+        );
+        
+        allFiles = [...allFiles, ...droppedFiles];
+        updateFileList(allFiles);
+        fileInput.value = ""; // clear native input so it can accept same file again
       });
-
+  
       fileInput.addEventListener("change", () => {
-        updateFileList(Array.from(fileInput.files));
-      });
+        const selectedFiles = Array.from(fileInput.files);
+        const newFiles = selectedFiles.filter(newFile =>
+          !allFiles.some(existingFile =>
+            existingFile.name === newFile.name && existingFile.size === newFile.size
+          )
+        );
 
+        allFiles = [...allFiles, ...newFiles];
+        updateFileList(allFiles);
+        fileInput.value = "";
+      });
+  
       function updateFileList(files) {
         fileList.innerHTML = "";
-
+  
         if (files.length === 0) {
           uploadedFilesHeader.style.display = "none";
           return;
         }
-
+  
         uploadedFilesHeader.style.display = "block";
 
+        function formatFileSize(bytes) {
+          if (bytes < 1024) return `${bytes} B`;
+          else if (bytes < 1024 * 1024) return `${(bytes / 1024).toFixed(1)} KB`;
+          else return `${(bytes / (1024 * 1024)).toFixed(1)} MB`;
+}
+  
         files.forEach(file => {
           const li = document.createElement("li");
           const link = document.createElement("a");
-          link.textContent = file.name;
+          link.textContent = `${file.name} (${formatFileSize(file.size)})`;
           link.href = URL.createObjectURL(file);
           link.target = "_blank";
           link.style.color = "#007bff";
@@ -137,32 +122,54 @@
           fileList.appendChild(li);
         });
       }
-
-      function createFileList(files) {
-        const dataTransfer = new DataTransfer();
-        files.forEach(file => dataTransfer.items.add(file));
-        return dataTransfer.files;
-      }
-
+  
       openModalBtn.addEventListener("click", function () {
-        if (!fileInput.files.length) {
+        if (allFiles.length === 0) {
           alert("Please select or drop at least one file first.");
           return;
         }
         modal.style.display = "flex";
       });
-
+  
       closeModalBtn.addEventListener("click", () => {
         modal.style.display = "none";
       });
-
+  
       document.getElementById("submitHubBtn").addEventListener("click", function () {
         const hubName = hubNameInput.value.trim();
         if (hubName) {
           document.getElementById("hub-name-hidden").value = hubName;
-          actualForm.submit();
+  
+          // ✅ Build FormData manually using allFiles
+          const formData = new FormData();
+          formData.append("title", hubName);
+          allFiles.forEach(file => {
+            formData.append("files", file);
+          });
+  
+          fetch(actualForm.action || window.location.href, {
+            method: "POST",
+            body: formData,
+            headers: {
+              "X-CSRFToken": document.querySelector("[name=csrfmiddlewaretoken]").value
+            }
+          })
+          .then(response => {
+            if (response.redirected) {
+              window.location.href = response.url;
+            } else {
+              return response.text().then(html => {
+                document.open();
+                document.write(html);
+                document.close();
+              });
+            }
+          })
+          .catch(error => {
+            console.error("Upload failed:", error);
+          });
         }
       });
     });
-  </script>
+  </script>  
 {% endblock %}
