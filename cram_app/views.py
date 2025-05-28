@@ -263,12 +263,51 @@ def my_cram_hubs(request):
         'hubs': hubs
     })
 
+import os
+
 @login_required
 def add_files_to_hub(request, hub_id):
     hub = get_object_or_404(CramHub, id=hub_id, user=request.user)
 
     if request.method == "POST":
         files = request.FILES.getlist("files")
+
+        if not files:
+            return render(request, "cram_app/cram_hub_dashboard.html", {
+                "hub": hub,
+                "error": "Please select at least one file to upload."
+            })
+
+        allowed_types = [
+            "application/pdf",
+            "application/msword",
+            "application/vnd.openxmlformats-officedocument.wordprocessingml.document"
+        ]
+
+        MAX_TOTAL_SIZE = 25 * 1024 * 1024  # 25 MB
+
+        # Get size of already uploaded files
+        existing_total = sum(
+            f.file.size for f in hub.files.all()
+            if f.file and hasattr(f.file, 'size')
+        )
+
+        # Get size of new files
+        new_total = sum(f.size for f in files)
+
+        if existing_total + new_total > MAX_TOTAL_SIZE:
+            return render(request, "cram_app/cram_hub_dashboard.html", {
+                "hub": hub,
+                "error": "Total file size for this hub exceeds the 25 MB limit."
+            })
+
+        for f in files:
+            if f.content_type not in allowed_types:
+                return render(request, "cram_app/cram_hub_dashboard.html", {
+                    "hub": hub,
+                    "error": "Only PDF or Word documents are allowed."
+                })
+
         for f in files:
             filename = default_storage.save(f"uploaded_files/{slugify(f.name)}", f)
             UploadedFile.objects.create(
@@ -276,7 +315,10 @@ def add_files_to_hub(request, hub_id):
                 file=filename,
                 original_filename=f.name
             )
+
         return redirect("cram_hub_dashboard", hub_id=hub.id)
+
+    return redirect("cram_hub_dashboard", hub_id=hub.id)
 
 @login_required
 def edit_question(request, question_id):

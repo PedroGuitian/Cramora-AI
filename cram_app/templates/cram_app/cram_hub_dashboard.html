@@ -45,9 +45,12 @@
       <h3>Uploaded Files</h3>
       <ul id="fileList" class="ul_no_bullets" style="text-align: left;">
         {% for f in hub.files.all %}
-          <li><a href="{{ f.file.url }}" target="_blank" style="color: #007bff; text-decoration: underline;">{{ f.original_filename }}</a></li>
-        {% empty %}
-          <li>No files uploaded yet.</li>
+          <li>
+            <a href="{{ f.file.url }}" target="_blank" style="color: #007bff; text-decoration: underline;" class="uploaded-file-link">
+              {{ f.original_filename }}
+              <span class="file-size" data-url="{{ f.file.url }}"></span>
+            </a>
+          </li>
         {% endfor %}
       </ul>
 
@@ -59,9 +62,10 @@
       <form method="post" action="{% url 'add_files_to_hub' hub.id %}" enctype="multipart/form-data" id="uploadMoreForm">
         {% csrf_token %}
         <div id="dropzone" class="dropzone">
+          <i class="fas fa-cloud-upload-alt upload-icon"></i>
           <p>Drag and drop your files or click here to upload</p>
           <p>Maximum size: 25MB</p>
-          <input type="file" name="files" multiple style="display:none;" id="moreFiles">
+          <input type="file" name="files" accept=".pdf,.doc,.docx,.ppt,.pptx,.txt" multiple required style="display:none;" id="moreFiles">
         </div>
         <br>
         <button type="submit">Submit</button>
@@ -72,64 +76,128 @@
 
   <!-- Script -->
   <script>
+    document.addEventListener("DOMContentLoaded", () => {
+      const sizeSpans = document.querySelectorAll(".file-size");
+  
+      function formatFileSize(bytes) {
+        if (bytes < 1024) return `${bytes} B`;
+        else if (bytes < 1024 * 1024) return `${(bytes / 1024).toFixed(1)} KB`;
+        else return `${(bytes / (1024 * 1024)).toFixed(1)} MB`;
+      }
+  
+      // Fetch and display sizes for uploaded files and store raw size
+      sizeSpans.forEach(span => {
+        const url = span.dataset.url;
+        fetch(url, { method: 'HEAD' }).then(res => {
+          const size = res.headers.get('content-length');
+          if (size) {
+            span.textContent = `(${formatFileSize(parseInt(size))})`;
+            span.setAttribute("data-size", size); // store raw size for duplicate checking
+          }
+        });
+      });
+    });
+  
+    let newFiles = [];
+  
     function openFileModal() {
       document.getElementById("fileModal").style.display = "flex";
     }
-
+  
     function closeFileModal() {
       document.getElementById("fileModal").style.display = "none";
     }
-
+  
     const dropzone = document.getElementById("dropzone");
     const fileInput = document.getElementById("moreFiles");
     const pendingFilesList = document.getElementById("pendingFilesList");
-
+  
     dropzone.addEventListener("click", () => fileInput.click());
-
+  
     dropzone.addEventListener("dragover", (e) => {
       e.preventDefault();
       dropzone.classList.add("highlight");
     });
-
+  
     dropzone.addEventListener("dragleave", () => {
       dropzone.classList.remove("highlight");
     });
-
+  
     dropzone.addEventListener("drop", (e) => {
       e.preventDefault();
       dropzone.classList.remove("highlight");
       fileInput.files = e.dataTransfer.files;
       updatePendingFiles(fileInput.files);
     });
-
+  
     fileInput.addEventListener("change", () => {
       updatePendingFiles(fileInput.files);
     });
-
+  
     function updatePendingFiles(fileList) {
-      pendingFilesList.innerHTML = "";
       const files = Array.from(fileList);
-
-      if (files.length === 0) {
-        const li = document.createElement("li");
-        li.textContent = "No new files selected.";
-        pendingFilesList.appendChild(li);
-        return;
-      }
-
-      files.forEach(file => {
-        const li = document.createElement("li");
-        const link = document.createElement("a");
-
-        link.href = URL.createObjectURL(file);
-        link.target = "_blank";
-        link.textContent = file.name;
-        link.style.color = "#007bff";
-        link.style.textDecoration = "underline";
-
-        li.appendChild(link);
-        pendingFilesList.appendChild(li);
+  
+      // Get uploaded file name/size pairs from DOM
+      const uploadedFileKeys = new Set();
+      document.querySelectorAll("#fileList li").forEach(li => {
+        const link = li.querySelector("a");
+        const sizeSpan = li.querySelector(".file-size");
+        if (link && sizeSpan && sizeSpan.dataset.size) {
+          const name = link.href.split('/').pop();  // Gets actual filename from file URL
+          const size = sizeSpan.dataset.size;
+          uploadedFileKeys.add(`${name}:${size}`);
+        }
       });
+  
+      const newlyAcceptedFiles = [];
+  
+      // Check each new file
+      files.forEach(file => {
+        const fileKey = `${file.name}:${file.size}`;
+        const isDuplicateUploaded = uploadedFileKeys.has(fileKey);
+        const isDuplicatePending = newFiles.some(f => f.name === file.name && f.size === file.size);
+  
+        if (isDuplicateUploaded) {
+          alert(`"${file.name}" was already uploaded. Duplicate files are not allowed.`);
+          return;
+        }
+  
+        if (isDuplicatePending) {
+          alert(`"${file.name}" is already in the pending list.`);
+          return;
+        }
+  
+        newFiles.push(file);
+        newlyAcceptedFiles.push(file);
+      });
+  
+      // Re-render pending list
+      pendingFilesList.innerHTML = "";
+  
+      if (newFiles.length === 0) {
+        const li = document.createElement("li");
+        li.textContent = "No new files have been uploaded yet.";
+        pendingFilesList.appendChild(li);
+      } else {
+        newFiles.forEach(file => {
+          const li = document.createElement("li");
+          const link = document.createElement("a");
+  
+          link.href = URL.createObjectURL(file);
+          link.target = "_blank";
+          link.textContent = `${file.name} (${formatFileSize(file.size)})`;
+          link.style.color = "#007bff";
+          link.style.textDecoration = "underline";
+  
+          li.appendChild(link);
+          pendingFilesList.appendChild(li);
+        });
+      }
+  
+      // Sync newFiles to the actual input field
+      const dataTransfer = new DataTransfer();
+      newFiles.forEach(file => dataTransfer.items.add(file));
+      fileInput.files = dataTransfer.files;
     }
-  </script>
+  </script>  
 {% endblock %}

@@ -104,11 +104,11 @@
   
         uploadedFilesHeader.style.display = "block";
 
-        function formatFileSize(bytes) {
+        function formatFileSize(bytes) {    
           if (bytes < 1024) return `${bytes} B`;
           else if (bytes < 1024 * 1024) return `${(bytes / 1024).toFixed(1)} KB`;
           else return `${(bytes / (1024 * 1024)).toFixed(1)} MB`;
-}
+        }
   
         files.forEach(file => {
           const li = document.createElement("li");

@@ -435,3 +435,9 @@ a.button-link:hover {
   font-size: 0.9rem;
   margin-top: 10px;
 }
+
+/* cram_hub_dashboard.html styling */
+.dropzone .upload-icon{
+  font-size: 25px;
+  color: #493DC7;
+}
