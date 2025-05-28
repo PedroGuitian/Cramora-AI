@@ -10,15 +10,6 @@ body {
   padding: 15px;
 }
 
-/* .container {
-  max-width: 1200px;
-  margin: 40px auto;
-  background: white;
-  padding: 30px;
-  border-radius: 12px;
-  box-shadow: 0 8px 30px rgba(0, 0, 0, 0.1);
-} */
-
 header {
   margin-bottom: 30px;
   text-align: center;
@@ -27,12 +18,12 @@ header {
 header h1 {
   font-size: 2.5rem;
   font-weight: 600;
-  color: #007bff;
+  color: #493DC7;
   margin-bottom: 10px;
 }
 
 nav a {
-  color: #007bff;
+  color: #493DC7;
   text-decoration: none;
   margin: 0 15px;
   font-weight: 500;
@@ -40,13 +31,13 @@ nav a {
 }
 
 nav a:hover {
-  color: #0056b3;
+  color: #322A88;
 }
 
 .nav-link {
   all: unset;
   display: inline-block;
-  color: #007bff;
+  color: #493DC7;
   font-weight: 500;
   margin: 0 15px;
   cursor: pointer;
@@ -60,7 +51,7 @@ nav a:hover {
 
 .nav-link:hover,
 .nav-link:focus {
-  color: #0056b3;
+  color: #322A88;
   text-decoration: underline;
   transform: translateY(-2px);
   background-color: transparent;  /* 👈 prevents hover background */
@@ -81,7 +72,7 @@ textarea {
 }
 
 textarea:focus {
-  border-color: #007bff;
+  border-color: #493DC7;
   outline: none;
 }
 
@@ -109,7 +100,7 @@ button:active {
 
 .cram-sheet {
   background: #f9f9f9;
-  border-left: 5px solid #007bff;
+  border-left: 5px solid #493DC7;
   padding: 16px;
   margin-top: 20px;
   border-radius: 8px;
@@ -188,7 +179,7 @@ p {
 }
 
 .cram_sheet_list{
-  color: #007bff;
+  color: #493DC7;
   text-decoration: none;
   font-weight: 500;
   transition: color 0.3s ease;
@@ -200,7 +191,7 @@ p {
 }
 
 .dropzone {
-  border: 2px dashed #007bff;
+  border: 2px dashed #493DC7;
   border-radius: 8px;
   padding: 20px;
   text-align: center;
@@ -238,7 +229,7 @@ p {
 
 a.button-link {
   display: inline-block;
-  background-color: #007bff;
+  background-color: #493DC7;
   color: white;
   padding: 12px 20px;
   border-radius: 8px;
@@ -255,7 +246,7 @@ a.button-link {
 }
 
 a.button-link:hover {
-  background-color: #0056b3;
+  background-color: #322A88;
   transform: translateY(-2px);
 }
 
@@ -281,7 +272,7 @@ a.button-link:hover {
   all: unset;
   margin-right: 10px;
   display: inline-block;
-  color: #007bff;
+  color: #493DC7;
   font-weight: 500;
   cursor: pointer;
   text-decoration: none;
@@ -294,7 +285,7 @@ a.button-link:hover {
 
 .edit-link:hover,
 .edit-link:focus {
-  color: #0056b3;
+  color: #322A88;
   text-decoration: underline;
   transform: translateY(-2px);
   background-color: transparent;  /* 👈 prevents hover background */
@@ -305,7 +296,7 @@ a.button-link:hover {
 .delete-link {
   all: unset;
   display: inline-block;
-  color: #007bff;  /* color: #c53030; */
+  color: #493DC7;  /* color: #c53030; */
   font-weight: 500;
   cursor: pointer;
   text-decoration: none;
@@ -342,7 +333,7 @@ a.button-link:hover {
 }
 
 .form-input-style:focus {
-  border-color: #007bff;
+  border-color: #493DC7;
   outline: none;
 }
 

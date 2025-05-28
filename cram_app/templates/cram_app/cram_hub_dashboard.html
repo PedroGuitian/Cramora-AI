@@ -59,7 +59,8 @@
       <form method="post" action="{% url 'add_files_to_hub' hub.id %}" enctype="multipart/form-data" id="uploadMoreForm">
         {% csrf_token %}
         <div id="dropzone" class="dropzone">
-          <p>Drag and drop more files here or click to upload</p>
+          <p>Drag and drop your files or click here to upload</p>
+          <p>Maximum size: 25MB</p>
           <input type="file" name="files" multiple style="display:none;" id="moreFiles">
         </div>
         <br>
