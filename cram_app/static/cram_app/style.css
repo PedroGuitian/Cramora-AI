@@ -441,3 +441,42 @@ a.button-link:hover {
   font-size: 25px;
   color: #493DC7;
 }
+.pending-file-item {
+  display: flex;
+  justify-content: space-between;
+  align-items: start;
+  padding: 12px;
+  margin-bottom: 8px;
+  background-color: #f8f9fa;
+  border-radius: 6px;
+  border: 1px solid #dee2e6;
+}
+
+.pending-file-info {
+  flex-grow: 1;
+}
+
+.pending-file-info small {
+  color: #6c757d;
+  display: block;
+  margin-top: 5px;
+}
+
+.remove-file-btn {
+  background: none;
+  border: none;
+  color: #dc3545;
+  cursor: pointer;
+  padding: 4px 8px;
+  border-radius: 4px;
+  transition: background-color 0.2s;
+}
+
+.remove-file-btn:hover {
+  background-color: #ffebee;
+}
+
+.dropzone.highlight {
+  background-color: #e3f2fd;
+  border-color: #2196f3;
+}

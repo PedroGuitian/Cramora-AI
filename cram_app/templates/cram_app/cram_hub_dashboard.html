@@ -73,10 +73,15 @@
       </form>
     </div>
   </div>
-
-  <!-- Script -->
   <script>
     document.addEventListener("DOMContentLoaded", () => {
+      // Initialize variables and get DOM elements
+      const dropzone = document.getElementById("dropzone");
+      const fileInput = document.getElementById("moreFiles");
+      const pendingFilesList = document.getElementById("pendingFilesList");
+      let newFiles = [];
+  
+      // Initialize file size display for existing files
       const sizeSpans = document.querySelectorAll(".file-size");
   
       function formatFileSize(bytes) {
@@ -85,119 +90,126 @@
         else return `${(bytes / (1024 * 1024)).toFixed(1)} MB`;
       }
   
-      // Fetch and display sizes for uploaded files and store raw size
+      function formatFileDate(file) {
+        return new Date(file.lastModified).toLocaleString();
+      }
+  
+      // Fetch and display sizes for uploaded files
       sizeSpans.forEach(span => {
         const url = span.dataset.url;
         fetch(url, { method: 'HEAD' }).then(res => {
           const size = res.headers.get('content-length');
           if (size) {
-            span.textContent = `(${formatFileSize(parseInt(size))})`;
-            span.setAttribute("data-size", size); // store raw size for duplicate checking
+            span.textContent = ` (${formatFileSize(parseInt(size))})`;
+            span.setAttribute("data-size", size);
           }
         });
       });
-    });
   
-    let newFiles = [];
-  
-    function openFileModal() {
-      document.getElementById("fileModal").style.display = "flex";
-    }
-  
-    function closeFileModal() {
-      document.getElementById("fileModal").style.display = "none";
-    }
-  
-    const dropzone = document.getElementById("dropzone");
-    const fileInput = document.getElementById("moreFiles");
-    const pendingFilesList = document.getElementById("pendingFilesList");
-  
-    dropzone.addEventListener("click", () => fileInput.click());
-  
-    dropzone.addEventListener("dragover", (e) => {
-      e.preventDefault();
-      dropzone.classList.add("highlight");
-    });
-  
-    dropzone.addEventListener("dragleave", () => {
-      dropzone.classList.remove("highlight");
-    });
-  
-    dropzone.addEventListener("drop", (e) => {
-      e.preventDefault();
-      dropzone.classList.remove("highlight");
-      fileInput.files = e.dataTransfer.files;
-      updatePendingFiles(fileInput.files);
-    });
-  
-    fileInput.addEventListener("change", () => {
-      updatePendingFiles(fileInput.files);
-    });
-  
-    function updatePendingFiles(fileList) {
-      const files = Array.from(fileList);
-  
-      // Get uploaded file name/size pairs from DOM
-      const uploadedFileKeys = new Set();
-      document.querySelectorAll("#fileList li").forEach(li => {
-        const link = li.querySelector("a");
-        const sizeSpan = li.querySelector(".file-size");
-        if (link && sizeSpan && sizeSpan.dataset.size) {
-          const name = link.href.split('/').pop();  // Gets actual filename from file URL
-          const size = sizeSpan.dataset.size;
-          uploadedFileKeys.add(`${name}:${size}`);
-        }
-      });
-  
-      const newlyAcceptedFiles = [];
-  
-      // Check each new file
-      files.forEach(file => {
-        const fileKey = `${file.name}:${file.size}`;
-        const isDuplicateUploaded = uploadedFileKeys.has(fileKey);
-        const isDuplicatePending = newFiles.some(f => f.name === file.name && f.size === file.size);
-  
-        if (isDuplicateUploaded) {
-          alert(`"${file.name}" was already uploaded. Duplicate files are not allowed.`);
+      function updatePendingFilesList() {
+        pendingFilesList.innerHTML = '';
+        
+        if (newFiles.length === 0) {
+          const li = document.createElement('li');
+          li.textContent = 'No files selected';
+          pendingFilesList.appendChild(li);
           return;
         }
   
-        if (isDuplicatePending) {
-          alert(`"${file.name}" is already in the pending list.`);
-          return;
-        }
-  
-        newFiles.push(file);
-        newlyAcceptedFiles.push(file);
-      });
-  
-      // Re-render pending list
-      pendingFilesList.innerHTML = "";
-  
-      if (newFiles.length === 0) {
-        const li = document.createElement("li");
-        li.textContent = "No new files have been uploaded yet.";
-        pendingFilesList.appendChild(li);
-      } else {
         newFiles.forEach(file => {
-          const li = document.createElement("li");
-          const link = document.createElement("a");
-  
-          link.href = URL.createObjectURL(file);
-          link.target = "_blank";
-          link.textContent = `${file.name} (${formatFileSize(file.size)})`;
-          link.style.color = "#007bff";
-          link.style.textDecoration = "underline";
-  
-          li.appendChild(link);
+          const li = document.createElement('li');
+          li.className = 'pending-file-item';
+          li.innerHTML = `
+            <div class="pending-file-info">
+              <strong>${file.name}</strong><br>
+              <small>Size: ${formatFileSize(file.size)}</small>
+              <small>Last Modified: ${formatFileDate(file)}</small>
+            </div>
+            <button type="button" class="remove-file-btn" onclick="removeFile('${file.name}')" title="Remove file">
+              <i class="fas fa-times"></i>
+            </button>
+          `;
           pendingFilesList.appendChild(li);
         });
       }
   
-      // Sync newFiles to the actual input field
-      const dataTransfer = new DataTransfer();
-      newFiles.forEach(file => dataTransfer.items.add(file));
-      fileInput.files = dataTransfer.files;
-    }
-  </script>  
+      function checkForDuplicateFile(file) {
+        // Check existing uploaded files
+        const existingFiles = Array.from(document.querySelectorAll('.uploaded-file-link')).map(link => {
+          const sizeSpan = link.querySelector('.file-size');
+          return {
+            name: link.textContent.trim().replace(/\s*\(.*\)$/, ''),
+            size: parseInt(sizeSpan?.dataset.size || 0)
+          };
+        });
+  
+        return existingFiles.some(existing => 
+          existing.name === file.name && existing.size === file.size
+        );
+      }
+  
+      function handleFiles(files) {
+        Array.from(files).forEach(file => {
+          if (checkForDuplicateFile(file)) {
+            alert(`File "${file.name}" already exists in this Cram Hub.`);
+            return;
+          }
+  
+          if (!newFiles.some(f => f.name === file.name)) {
+            newFiles.push(file);
+          } else {
+            alert(`File "${file.name}" is already in the pending list.`);
+          }
+        });
+  
+        updatePendingFilesList();
+  
+        // Update the file input
+        const dataTransfer = new DataTransfer();
+        newFiles.forEach(file => dataTransfer.items.add(file));
+        fileInput.files = dataTransfer.files;
+      }
+  
+      // Modal controls
+      window.openFileModal = function() {
+        document.getElementById("fileModal").style.display = "flex";
+      }
+  
+      window.closeFileModal = function() {
+        document.getElementById("fileModal").style.display = "none";
+      }
+  
+      // Remove file function (must be global for onclick access)
+      window.removeFile = function(fileName) {
+        newFiles = newFiles.filter(file => file.name !== fileName);
+        updatePendingFilesList();
+        
+        const dataTransfer = new DataTransfer();
+        newFiles.forEach(file => dataTransfer.items.add(file));
+        fileInput.files = dataTransfer.files;
+      };
+  
+      // Event Listeners
+      dropzone.addEventListener('click', () => fileInput.click());
+  
+      dropzone.addEventListener('dragover', (e) => {
+        e.preventDefault();
+        dropzone.classList.add('highlight');
+      });
+  
+      dropzone.addEventListener('dragleave', () => {
+        dropzone.classList.remove('highlight');
+      });
+  
+      dropzone.addEventListener('drop', (e) => {
+        e.preventDefault();
+        dropzone.classList.remove('highlight');
+        handleFiles(e.dataTransfer.files);
+      });
+  
+      fileInput.addEventListener('change', (e) => {
+        handleFiles(e.target.files);
+      });
+    });
+  </script>
 {% endblock %}
