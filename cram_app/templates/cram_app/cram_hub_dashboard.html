@@ -9,9 +9,9 @@
   <button onclick="openFileModal()">View Uploaded Files</button>
   <a href="{% url 'generate_cram_sheet' hub.id %}" class="button-link" style="margin-left: 10px;">Generate Cram Sheet</a>
   {% if show_questions %}
-    <a href="{% url 'generate_test_questions' hub.id %}" class="button-link" style="margin-left: 10px;">Generate More Questions</a>
+    <button id="generateQuestionsBtn" class="button-link" style="margin-left: 10px;">Generate More Questions</button>
   {% else %}
-    <a href="{% url 'generate_test_questions' hub.id %}" class="button-link" style="margin-left: 10px;">Generate Questions</a>
+    <button id="generateQuestionsBtn" class="button-link" style="margin-left: 10px;">Generate Questions</button>
   {% endif %}
 
   <!-- Generated Questions -->
@@ -37,8 +37,9 @@
   </div>
   {% endif %}
   <div class="center-wrapper">
-    <a href="{% url 'generate_test_questions' hub.id %}" class="button-link" style="align-self: center;">Add Question</a>
-  </div>
+    <a href="{% url 'generate_test_questions' hub.id %}" class="button-link" style="align-self: center;" onclick="showLoading()">Add Question</a>
+  </div>  
+
   <!-- File Modal -->
   <div id="fileModal" class="modal-overlay" style="display:none;">
     <div class="modal">
@@ -73,28 +74,74 @@
       </form>
     </div>
   </div>
+
+  <!-- Loading Modal -->
+  <div id="loadingModal" class="modal-overlay" style="display: none;">
+    <div class="modal">
+      <div class="spinner"></div>
+      <p style="margin-top: 10px;">Loading content...</p>
+    </div>
+  </div>
+
   <script>
+    function showLoading() {
+      const modal = document.getElementById("loadingModal");
+      if (modal) {
+        modal.style.display = "flex";
+      }
+    }
+
+    function hideLoading() {
+      const modal = document.getElementById("loadingModal");
+      if (modal) {
+        modal.style.display = "none";
+      }
+    }
+
     document.addEventListener("DOMContentLoaded", () => {
-      // Initialize variables and get DOM elements
+      const generateBtn = document.getElementById("generateQuestionsBtn");
+
+      if (generateBtn) {
+        generateBtn.addEventListener("click", function () {
+          showLoading();
+
+          fetch("{% url 'generate_test_questions' hub.id %}", {
+            method: "GET",
+            headers: {
+              "X-Requested-With": "XMLHttpRequest"
+            }
+          })
+          .then(response => {
+            if (!response.ok) throw new Error("Failed to generate questions");
+            return response.text();
+          })
+          .then(data => {
+            location.reload();
+          })
+          .catch(error => {
+            alert("Something went wrong: " + error.message);
+            hideLoading();
+          });
+        });
+      }
+
       const dropzone = document.getElementById("dropzone");
       const fileInput = document.getElementById("moreFiles");
       const pendingFilesList = document.getElementById("pendingFilesList");
       let newFiles = [];
-  
-      // Initialize file size display for existing files
+
       const sizeSpans = document.querySelectorAll(".file-size");
-  
+
       function formatFileSize(bytes) {
         if (bytes < 1024) return `${bytes} B`;
         else if (bytes < 1024 * 1024) return `${(bytes / 1024).toFixed(1)} KB`;
         else return `${(bytes / (1024 * 1024)).toFixed(1)} MB`;
       }
-  
+
       function formatFileDate(file) {
         return new Date(file.lastModified).toLocaleString();
       }
-  
-      // Fetch and display sizes for uploaded files
+
       sizeSpans.forEach(span => {
         const url = span.dataset.url;
         fetch(url, { method: 'HEAD' }).then(res => {
@@ -105,17 +152,16 @@
           }
         });
       });
-  
+
       function updatePendingFilesList() {
         pendingFilesList.innerHTML = '';
-        
         if (newFiles.length === 0) {
           const li = document.createElement('li');
           li.textContent = 'No files selected';
           pendingFilesList.appendChild(li);
           return;
         }
-  
+
         newFiles.forEach(file => {
           const li = document.createElement('li');
           li.className = 'pending-file-item';
@@ -132,9 +178,8 @@
           pendingFilesList.appendChild(li);
         });
       }
-  
+
       function checkForDuplicateFile(file) {
-        // Check existing uploaded files
         const existingFiles = Array.from(document.querySelectorAll('.uploaded-file-link')).map(link => {
           const sizeSpan = link.querySelector('.file-size');
           return {
@@ -142,71 +187,66 @@
             size: parseInt(sizeSpan?.dataset.size || 0)
           };
         });
-  
+
         return existingFiles.some(existing => 
           existing.name === file.name && existing.size === file.size
         );
       }
-  
+
       function handleFiles(files) {
         Array.from(files).forEach(file => {
           if (checkForDuplicateFile(file)) {
             alert(`File "${file.name}" already exists in this Cram Hub.`);
             return;
           }
-  
+
           if (!newFiles.some(f => f.name === file.name)) {
             newFiles.push(file);
           } else {
             alert(`File "${file.name}" is already in the pending list.`);
           }
         });
-  
+
         updatePendingFilesList();
-  
-        // Update the file input
+
         const dataTransfer = new DataTransfer();
         newFiles.forEach(file => dataTransfer.items.add(file));
         fileInput.files = dataTransfer.files;
       }
-  
-      // Modal controls
+
       window.openFileModal = function() {
         document.getElementById("fileModal").style.display = "flex";
       }
-  
+
       window.closeFileModal = function() {
         document.getElementById("fileModal").style.display = "none";
       }
-  
-      // Remove file function (must be global for onclick access)
+
       window.removeFile = function(fileName) {
         newFiles = newFiles.filter(file => file.name !== fileName);
         updatePendingFilesList();
-        
         const dataTransfer = new DataTransfer();
         newFiles.forEach(file => dataTransfer.items.add(file));
         fileInput.files = dataTransfer.files;
       };
-  
-      // Event Listeners
+
       dropzone.addEventListener('click', () => fileInput.click());
-  
+
       dropzone.addEventListener('dragover', (e) => {
         e.preventDefault();
         dropzone.classList.add('highlight');
       });
-  
+
       dropzone.addEventListener('dragleave', () => {
         dropzone.classList.remove('highlight');
       });
-  
+
       dropzone.addEventListener('drop', (e) => {
         e.preventDefault();
         dropzone.classList.remove('highlight');
         handleFiles(e.dataTransfer.files);
       });
-  
+
       fileInput.addEventListener('change', (e) => {
         handleFiles(e.target.files);
       });

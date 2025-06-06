@@ -10,8 +10,6 @@ from django.contrib.auth.decorators import login_required
 from django.contrib.auth.views import LoginView, LogoutView
 from django.http import JsonResponse, HttpResponseBadRequest
 from django.core.serializers.json import DjangoJSONEncoder
-from django.core.files.storage import default_storage
-from django.utils.text import slugify
 from django.views.decorators.http import require_POST
 from .models import CramHub, UploadedFile, CramSheet, TestQuestion
 
@@ -59,40 +57,37 @@ def create_cram_hub(request):
 
         allowed_types = [
             "application/pdf",
-            "application/msword",  # .doc
-            "application/vnd.openxmlformats-officedocument.wordprocessingml.document"  # .docx
+            "application/msword",
+            "application/vnd.openxmlformats-officedocument.wordprocessingml.document"
         ]
 
-        MAX_TOTAL_SIZE = 25 * 1024 * 1024  # 25 MB in bytes
-
+        MAX_TOTAL_SIZE = 25 * 1024 * 1024  # 25 MB
         total_size = sum(f.size for f in files)
 
-        if tital_size > MAX_TOTAL_SIZE:
-            return render(request, "cram_app/creat_cram_hub.html", {
-                "error": "Toatl file size exceeds 25 MB limit."
+        if total_size > MAX_TOTAL_SIZE:
+            return render(request, "cram_app/create_cram_hub.html", {
+                "error": "Total file size exceeds 25 MB limit."
             })
 
-        # Create the hub first
         hub = CramHub.objects.create(user=request.user, title=title)
 
         for f in files:
             if f.content_type not in allowed_types:
-                # Delete hub if one file fails
                 hub.delete()
                 return render(request, "cram_app/create_cram_hub.html", {
                     "error": "Only PDF or Word documents are allowed."
                 })
 
-            filename = default_storage.save(f"uploaded_files/{slugify(f.name)}", f)
             UploadedFile.objects.create(
                 cram_hub=hub,
-                file=filename,
+                file=f,  # ✅ Save actual file, not a path
                 original_filename=f.name
             )
 
         return redirect("cram_hub_dashboard", hub_id=hub.id)
 
     return render(request, "cram_app/create_cram_hub.html")
+
 
 @login_required
 def generate_cram_sheet(request, hub_id):
@@ -169,6 +164,7 @@ def generate_test_questions(request, hub_id):
     files = hub.files.all()
     full_text = ""
 
+    # Step 1: Extract text from files
     for file in files:
         try:
             ext = os.path.splitext(file.original_filename)[1].lower()
@@ -185,23 +181,38 @@ def generate_test_questions(request, hub_id):
                         full_text += content.decode("utf-8", errors="ignore") + "\n"
                     except UnicodeDecodeError:
                         full_text += content.decode("latin-1") + "\n"
+        except Exception as e:
+            print(f"❌ Could not read file {file.original_filename}: {e}")
+            continue
 
-        except Exception:
-            continue  # skip unreadable files silently
+    if not full_text.strip():
+        return HttpResponseBadRequest("No readable content was extracted from uploaded files.")
 
-    # ✅ Limit input to ~10k tokens
+    # Step 2: Token limit check
     max_tokens = 10000
     if estimate_tokens(full_text) > max_tokens:
-        full_text = full_text[:40000]  # ~10k tokens (approx)
+        full_text = full_text[:40000]  # Approx. 10k tokens
 
+    # Step 3: Collect existing questions to avoid duplicates
+    existing_questions = list(hub.questions.values_list("question_text", flat=True))
+    existing_questions_json = json.dumps(existing_questions, ensure_ascii=False)
+
+    # Step 4: AI prompt
     prompt = f"""
-        Generate 10 multiple-choice questions based on this study material.
-        Each question should include:
-        - question
-        - correct_answer
-        - wrong_answers (3 total)
+        You are a quiz generator AI.
 
-        Return in JSON format like this:
+        Study the following material and generate 10 **unique** multiple-choice questions.
+        Make sure **none** of the questions repeat the ones already generated.
+
+        Previously generated questions:
+        {existing_questions_json}
+
+        Each new question should include:
+        - "question"
+        - "correct_answer"
+        - "wrong_answers" (3 total)
+
+        Return ONLY valid JSON in this format:
         [
           {{
             "question": "...",
@@ -228,16 +239,24 @@ def generate_test_questions(request, hub_id):
 
         content = response.choices[0].message.content.strip()
 
+        # Clean code block format if present
         if content.startswith("```"):
             content = content.strip("`").replace("json", "").strip()
 
         if not content or not content.startswith("["):
+            print("❌ Invalid AI response:", content[:200])
             return HttpResponseBadRequest("Invalid AI response. Please check your input files and try again.")
 
-        questions = json.loads(content)
+        try:
+            questions = json.loads(content)
+        except json.JSONDecodeError as e:
+            print("❌ JSON decode error:", e)
+            return HttpResponseBadRequest("AI returned malformed JSON. Please try again.")
 
-        existing_texts = set(hub.questions.values_list("question_text", flat=True))
-        
+        # Step 5: Filter and create new questions
+        existing_texts = set(existing_questions)
+        new_questions = 0
+
         for q in questions:
             if q["question"] not in existing_texts:
                 TestQuestion.objects.create(
@@ -246,6 +265,10 @@ def generate_test_questions(request, hub_id):
                     correct_answer=q["correct_answer"],
                     wrong_answers=q["wrong_answers"]
                 )
+                new_questions += 1
+
+        if new_questions == 0:
+            return HttpResponseBadRequest("All AI-generated questions already exist. Try again for new ones.")
 
         return render(request, "cram_app/cram_hub_dashboard.html", {
             "hub": hub,
@@ -253,7 +276,8 @@ def generate_test_questions(request, hub_id):
             "show_questions": True
         })
 
-    except Exception:
+    except Exception as e:
+        print("❌ General error:", e)
         return HttpResponseBadRequest("Something went wrong while generating test questions. Please try again.")
 
 @login_required
@@ -284,15 +308,10 @@ def add_files_to_hub(request, hub_id):
             "application/vnd.openxmlformats-officedocument.wordprocessingml.document"
         ]
 
-        MAX_TOTAL_SIZE = 25 * 1024 * 1024  # 25 MB
-
-        # Get size of already uploaded files
+        MAX_TOTAL_SIZE = 25 * 1024 * 1024
         existing_total = sum(
-            f.file.size for f in hub.files.all()
-            if f.file and hasattr(f.file, 'size')
+            f.file.size for f in hub.files.all() if f.file and hasattr(f.file, 'size')
         )
-
-        # Get size of new files
         new_total = sum(f.size for f in files)
 
         if existing_total + new_total > MAX_TOTAL_SIZE:
@@ -308,17 +327,16 @@ def add_files_to_hub(request, hub_id):
                     "error": "Only PDF or Word documents are allowed."
                 })
 
-        for f in files:
-            filename = default_storage.save(f"uploaded_files/{slugify(f.name)}", f)
             UploadedFile.objects.create(
                 cram_hub=hub,
-                file=filename,
+                file=f,  # ✅ Save actual file
                 original_filename=f.name
             )
 
         return redirect("cram_hub_dashboard", hub_id=hub.id)
 
     return redirect("cram_hub_dashboard", hub_id=hub.id)
+
 
 @login_required
 def edit_question(request, question_id):
