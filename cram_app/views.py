@@ -1,4 +1,4 @@
-import os, json
+import os, json, re
 import tiktoken
 import fitz
 from .forms import TestQuestionForm, EditTestQuestionForm
@@ -67,7 +67,7 @@ def create_cram_hub(request):
 
         total_size = sum(f.size for f in files)
 
-        if tital_size > MAX_TOTAL_SIZE:
+        if total_size > MAX_TOTAL_SIZE:
             return render(request, "cram_app/creat_cram_hub.html", {
                 "error": "Toatl file size exceeds 25 MB limit."
             })
@@ -161,7 +161,7 @@ def estimate_tokens(text):
         enc = tiktoken.encoding_for_model("gpt-4")
         return len(enc.encode(text))
     except Exception:
-        return int(len(text) / 4)  # fallback
+        return int(len(text) / 4)
 
 @login_required
 def generate_test_questions(request, hub_id):
@@ -175,6 +175,7 @@ def generate_test_questions(request, hub_id):
 
             if ext == ".pdf":
                 with file.file.open("rb") as f:
+                    import fitz
                     doc = fitz.open(stream=f.read(), filetype="pdf")
                     for page in doc:
                         full_text += page.get_text()
@@ -186,34 +187,37 @@ def generate_test_questions(request, hub_id):
                     except UnicodeDecodeError:
                         full_text += content.decode("latin-1") + "\n"
 
-        except Exception:
-            continue  # skip unreadable files silently
+        except Exception as e:
+            print(f"❌ Skipping file {file.original_filename}: {e}")
+            continue
 
-    # ✅ Limit input to ~10k tokens
+    # Trim to ~10k tokens if necessary
     max_tokens = 10000
     if estimate_tokens(full_text) > max_tokens:
-        full_text = full_text[:40000]  # ~10k tokens (approx)
+        full_text = full_text[:40000]
 
     prompt = f"""
         Generate 10 multiple-choice questions based on this study material.
-        Each question should include:
-        - question
-        - correct_answer
-        - wrong_answers (3 total)
+        Each question must include:
+        - "question": a concise question string
+        - "correct_answer": the right choice
+        - "wrong_answers": a list of exactly 3 incorrect but believable options
 
-        Return in JSON format like this:
+        Return ONLY valid JSON. Do not include explanations, formatting, or markdown.
+
+        Format:
         [
-          {{
+        {{
             "question": "...",
             "correct_answer": "...",
             "wrong_answers": ["...", "...", "..."]
-          }},
-          ...
+        }},
+        ...
         ]
 
         Study material:
         {full_text}
-    """
+        """
 
     try:
         response = client.chat.completions.create(
@@ -227,17 +231,23 @@ def generate_test_questions(request, hub_id):
         )
 
         content = response.choices[0].message.content.strip()
+        print("📥 Raw AI response:\n", content)
 
-        if content.startswith("```"):
-            content = content.strip("`").replace("json", "").strip()
-
-        if not content or not content.startswith("["):
+        # Extract JSON array using regex
+        match = re.search(r'\[\s*{.*?}\s*\]', content, re.DOTALL)
+        if not match:
+            print("❌ Failed to extract JSON from AI response.")
             return HttpResponseBadRequest("Invalid AI response. Please check your input files and try again.")
 
-        questions = json.loads(content)
+        try:
+            questions = json.loads(match.group())
+        except json.JSONDecodeError as e:
+            print("❌ JSON decode error:", e)
+            print("Returned content:", match.group())
+            return HttpResponseBadRequest("AI returned malformed JSON. Please try again.")
 
         existing_texts = set(hub.questions.values_list("question_text", flat=True))
-        
+
         for q in questions:
             if q["question"] not in existing_texts:
                 TestQuestion.objects.create(
@@ -253,7 +263,10 @@ def generate_test_questions(request, hub_id):
             "show_questions": True
         })
 
-    except Exception:
+    except Exception as e:
+        print("❌ Exception during question generation:", e)
+        import traceback
+        traceback.print_exc()
         return HttpResponseBadRequest("Something went wrong while generating test questions. Please try again.")
 
 @login_required
