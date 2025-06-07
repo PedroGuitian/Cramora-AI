@@ -93,6 +93,7 @@ def create_cram_hub(request):
 def generate_cram_sheet(request, hub_id):
     hub = get_object_or_404(CramHub, id=hub_id, user=request.user)
     files = hub.files.all()
+
     full_text = ""
 
     for file in files:
