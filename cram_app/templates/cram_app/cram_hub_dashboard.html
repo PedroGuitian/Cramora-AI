@@ -7,13 +7,22 @@
 
   <!-- Action Buttons -->
   <button onclick="openFileModal()">View Uploaded Files</button>
+  {% if hub.cramsheet %}
+  <button onclick="toggleCramSheet()">Show/Hide Study Guide</button>
+  {% else %}
   <a href="{% url 'generate_cram_sheet' hub.id %}" class="button-link" style="margin-left: 10px;">Generate Cram Sheet</a>
+  {% endif %}
   {% if show_questions %}
     <button id="generateQuestionsBtn" class="button-link" style="margin-left: 10px;">Generate More Questions</button>
   {% else %}
     <button id="generateQuestionsBtn" class="button-link" style="margin-left: 10px;">Generate Questions</button>
   {% endif %}
 
+  <div id="cram-sheet" style="display: none; margin-top: 20px;" class="cram-sheet-markdown">
+    <hr>
+    <h1>{{ hub.title }} - Cram Sheet</h1>
+    {{ hub.cramsheet.content|safe }}
+  </div>
   <!-- Generated Questions -->
   {% if hub.questions.exists %}
   <hr>
@@ -96,6 +105,11 @@
       if (modal) {
         modal.style.display = "none";
       }
+    }
+
+    function toggleCramSheet() {
+      const sheet = document.getElementById("cram-sheet");
+      sheet.style.display = sheet.style.display === "none" ? "block" : "none";
     }
 
     document.addEventListener("DOMContentLoaded", () => {
