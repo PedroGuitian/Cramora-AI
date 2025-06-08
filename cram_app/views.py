@@ -1,6 +1,4 @@
-import os, json
-import tiktoken
-import fitz
+import os, json, markdown, tiktoken, fitz
 from .forms import TestQuestionForm, EditTestQuestionForm
 from openai import OpenAI
 from django.contrib.auth.forms import UserCreationForm
@@ -143,12 +141,16 @@ def generate_cram_sheet(request, hub_id):
         max_tokens=700
     )
 
-    content = response.choices[0].message.content.strip()
-    cram_sheet = CramSheet.objects.create(
+    content_raw = response.choices[0].message.content.strip()
+    content_html = markdown.markdown(content_raw)
+    CramSheet.objects.update_or_create(
         cram_hub=hub,
-        title=f"Cram Sheet - {hub.title}",
-        content=content
+        defaults={
+            "title": f"Cram Sheet - {hub.title}",
+            "content": content_html
+        }
     )
+    
 
     return redirect("cram_hub_dashboard", hub_id=hub.id)
 
