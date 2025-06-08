@@ -518,21 +518,21 @@ a.button-link:hover {
   100% { transform: rotate(360deg); }
 }
 
-.cram-sheet-markdown {
-  font-family: sans-serif;
-  font-size: 14px;
-  line-height: 1.4;
-  max-width: 800px;
-  margin: auto;
-  white-space: pre-wrap;
-}
-
-.cram-sheet-markdown h2, .cram-sheet-markdown strong {
+.cram-sheet-markdown h2 {
+  font-size: 18px;
   font-weight: bold;
+  margin-top: 1em;
 }
 
 .cram-sheet-markdown ul {
   padding-left: 20px;
-  margin-top: 0;
-  margin-bottom: 0;
+  margin: 0;
+}
+
+.cram-sheet-markdown li {
+  margin-bottom: 4px;
+}
+
+.cram-sheet-markdown p {
+  margin: 0.3em 0;
 }
