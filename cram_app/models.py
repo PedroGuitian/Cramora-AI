@@ -25,7 +25,10 @@ class TestQuestion(models.Model):
         return choices
 
     def __str__(self):
-        return f"Questions for: {self.cram_hub.title}"
+        return f"Question for: {self.cram_hub.title}"
+
+    class Meta:
+        ordering = ['created_at']
 
 class CramHub(models.Model):
     user = models.ForeignKey(User, on_delete=models.CASCADE)
