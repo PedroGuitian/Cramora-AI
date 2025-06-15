@@ -536,3 +536,123 @@ a.button-link:hover {
 .cram-sheet-markdown p {
   margin: 0.3em 0;
 }
+
+/* quiz.html */
+#quiz-container {
+  display: flex;
+  justify-content: center;
+  padding: 2rem;
+}
+
+.card {
+  background: white;
+  border-radius: 16px;
+  box-shadow: 0 4px 16px rgba(0, 0, 0, 0.1);
+  padding: 2.5rem;
+  width: 100%;
+  max-width: 900px;
+  text-align: center;
+}
+
+/* Question tracker */
+.question-count {
+  font-size: 1rem;
+  font-weight: bold;
+  color: #555;
+  margin-bottom: 1rem;
+}
+
+/* Two-column answer layout */
+.answers-grid {
+  display: grid;
+  grid-template-columns: 1fr;
+  gap: 1rem;
+  margin-top: 1.5rem;
+}
+
+@media (min-width: 768px) {
+  .answers-grid {
+    grid-template-columns: 1fr 1fr;
+  }
+}
+
+/* Answer Buttons */
+.answer-btn {
+  background-color: #f9f9f9;
+  color: #222;
+  border: 2px solid #ccc;
+  border-radius: 10px;
+  padding: 14px;
+  font-size: 1rem;
+  font-weight: 500;
+  cursor: pointer;
+  transition: all 0.2s ease-in-out;
+}
+
+.answer-btn:hover:not(:disabled) {
+  background-color: #f0f0f0;
+}
+
+.answer-btn.correct {
+  border-color: #28a745;
+  background-color: #e6ffe6;
+}
+
+.answer-btn.wrong {
+  border-color: #dc3545;
+  background-color: #ffe6e6;
+}
+
+.answer-btn:disabled {
+  opacity: 0.95;
+  cursor: not-allowed;
+}
+
+/* Note */
+.note {
+  margin-top: 1.5rem;
+  font-style: italic;
+  color: #666;
+}
+
+/* Missed Questions */
+.missed-container {
+  display: flex;
+  flex-direction: column;
+  gap: 1.25rem;
+  margin-top: 1rem;
+}
+
+.missed-question {
+  background-color: #f0f2f5;
+  padding: 1rem 1.5rem;
+  border-left: 4px solid #dc3545;
+  border-radius: 10px;
+  box-shadow: 0 2px 6px rgba(0,0,0,0.05);
+  font-size: 0.95rem;
+  text-align: left;
+}
+
+/* Back Button (inherits button-link style) */
+a.button-link {
+  display: inline-block;
+  background-color: #493DC7;
+  color: white;
+  padding: 12px 20px;
+  border-radius: 8px;
+  text-decoration: none;
+  font-size: 0.95rem;
+  font-weight: 400;
+  font-family: inherit;
+  border: none;
+  box-sizing: border-box;
+  line-height: normal;
+  cursor: pointer;
+  transition: background-color 0.3s ease, transform 0.2s ease;
+  margin-top: 10px;
+}
+
+a.button-link:hover {
+  background-color: #322A88;
+  transform: translateY(-2px);
+}

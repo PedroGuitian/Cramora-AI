@@ -10,6 +10,7 @@ from django.http import JsonResponse, HttpResponseBadRequest
 from django.core.serializers.json import DjangoJSONEncoder
 from django.views.decorators.http import require_POST
 from .models import CramHub, UploadedFile, CramSheet, TestQuestion
+from django.utils.safestring import mark_safe
 
 client = OpenAI(api_key=os.getenv("OPENAI_API_KEY"))
 
@@ -385,3 +386,19 @@ def add_question(request, hub_id):
         "hub": hub
     })
 
+def take_quiz(request, hub_id):
+    hub = get_object_or_404(CramHub, id=hub_id, user=request.user)
+    questions_qs = hub.questions.all()
+
+    questions_data = []
+    for q in questions_qs:
+        questions_data.append({
+            "question_text": q.question_text,
+            "correct_answer": q.correct_answer,
+            "wrong_answers": q.wrong_answers,  # ✅ Use the JSONField as-is
+        })
+
+    return render(request, "cram_app/quiz.html", {
+        "hub": hub,
+        "questions_json": mark_safe(json.dumps(questions_data)),
+    })
