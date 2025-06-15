@@ -1,0 +1,127 @@
+{% extends 'cram_app/layout.html' %}
+
+{% block title %}Take Quiz - {{ hub.title }}{% endblock %}
+
+{% block content %}
+<h2 style="text-align: center;">Quiz - {{ hub.title }}</h2>
+
+<div id="quiz-container">
+  <div id="question-card" class="card hidden">
+    <div id="question-count" class="question-count"></div>
+    <h3 id="question-text"></h3>
+    <div id="answer-buttons" class="answers-grid"></div>
+    <p class="note" id="next-note" style="display: none;">(Click anywhere to continue)</p>
+  </div>
+</div>
+
+<!-- Back to Hub Button -->
+<div style="text-align: center; margin-top: 2rem;">
+  <a href="{% url 'cram_hub_dashboard' hub.id %}" class="button-link">← Back to Hub</a>
+</div>
+
+<!-- Safely embed JSON -->
+<script id="quiz-data" type="application/json">
+  {{ questions_json|safe }}
+</script>
+
+<script>
+const quizQuestions = JSON.parse(document.getElementById("quiz-data").textContent);
+let currentQuestion = 0;
+let allowAdvance = false;
+let correctCount = 0;
+let incorrectQuestions = [];
+
+const container = document.getElementById("quiz-container");
+const card = document.getElementById("question-card");
+const questionText = document.getElementById("question-text");
+const questionCount = document.getElementById("question-count");
+const answerButtons = document.getElementById("answer-buttons");
+const nextNote = document.getElementById("next-note");
+
+renderQuestion(quizQuestions[currentQuestion]);
+
+function renderQuestion(q) {
+  allowAdvance = false;
+  nextNote.style.display = "none";
+  questionText.textContent = q.question_text;
+  questionCount.textContent = `${currentQuestion + 1} / ${quizQuestions.length}`;
+  answerButtons.innerHTML = "";
+
+  const choices = [q.correct_answer, ...q.wrong_answers].sort(() => Math.random() - 0.5);
+  choices.forEach(choice => {
+    const btn = document.createElement("button");
+    btn.textContent = choice;
+    btn.classList.add("answer-btn");
+    btn.dataset.answer = choice;
+    btn.onclick = () => handleAnswerClick(btn, q);
+    answerButtons.appendChild(btn);
+  });
+
+  card.classList.remove("hidden");
+}
+
+function handleAnswerClick(selectedBtn, q) {
+  if (allowAdvance) return;
+
+  allowAdvance = true;
+  nextNote.style.display = "block";
+
+  const correctAnswer = q.correct_answer;
+  document.querySelectorAll(".answer-btn").forEach(btn => {
+    btn.disabled = true;
+    if (btn.dataset.answer === correctAnswer) {
+      btn.classList.add("correct");
+    } else if (btn === selectedBtn) {
+      btn.classList.add("wrong");
+    }
+  });
+
+  if (selectedBtn.dataset.answer === correctAnswer) {
+    correctCount++;
+  } else {
+    incorrectQuestions.push({
+      question: q.question_text,
+      correct: correctAnswer
+    });
+  }
+}
+
+container.addEventListener("click", (e) => {
+  if (e.target.classList.contains("answer-btn")) return;
+  if (!allowAdvance) return;
+
+  if (currentQuestion < quizQuestions.length - 1) {
+    currentQuestion++;
+    renderQuestion(quizQuestions[currentQuestion]);
+  } else {
+    showResults();
+  }
+});
+
+function showResults() {
+  const score = Math.round((correctCount / quizQuestions.length) * 100);
+  let resultHTML = `
+    <h3>Quiz Completed!</h3>
+    <p>Your Score: <strong>${score}%</strong> (${correctCount} out of ${quizQuestions.length} correct)</p>
+  `;
+
+  if (incorrectQuestions.length > 0) {
+    resultHTML += `
+      <h4 style="margin-top: 2rem; text-align: center;">Questions You Missed:</h4>
+      <div class="missed-container">
+    `;
+    incorrectQuestions.forEach(q => {
+      resultHTML += `
+        <div class="missed-question">
+          <p><strong>Question:</strong> ${q.question}</p>
+          <p><strong>Correct Answer:</strong> ${q.correct}</p>
+        </div>
+      `;
+    });
+    resultHTML += `</div>`;
+  }
+
+  card.innerHTML = resultHTML;
+}
+</script>
+{% endblock %}

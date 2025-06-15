@@ -16,5 +16,6 @@ urlpatterns = [
     path('cram-hub/<int:hub_id>/add-files/', views.add_files_to_hub, name='add_files_to_hub'),
     path("question/<int:question_id>/edit/", views.edit_question, name="edit_question"),
     path("question/<int:question_id>/delete/", views.delete_question, name="delete_question"),
-    path('cram-hub/<int:hub_id>/add-question/', views.add_question, name='add_question')
+    path('cram-hub/<int:hub_id>/add-question/', views.add_question, name='add_question'),
+    path("cram-hub/<int:hub_id>/quiz/", views.take_quiz, name="take_quiz")
 ]

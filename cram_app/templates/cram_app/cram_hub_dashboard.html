@@ -17,6 +17,8 @@
   {% else %}
     <button id="generateQuestionsBtn" class="button-link" style="margin-left: 10px;">Generate Questions</button>
   {% endif %}
+  <a href="{% url 'take_quiz' hub.id %}" class="button-link">Take Quiz</a>
+
 
   <div id="cram-sheet" style="display: none; margin-top: 20px;" class="cram-sheet-markdown">
     <hr>
