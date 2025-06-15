@@ -2,12 +2,46 @@ from django import forms
 from .models import TestQuestion
 
 class TestQuestionForm(forms.ModelForm):
+    wrong1 = forms.CharField(label="", max_length=255, required=False)
+    wrong2 = forms.CharField(label="", max_length=255, required=False)
+    wrong3 = forms.CharField(label="", max_length=255, required=False)
+
     class Meta:
         model = TestQuestion
         fields = ['question_text', 'correct_answer']
         widgets = {
             'question_text': forms.Textarea(attrs={'rows': 2}),
         }
+
+    def __init__(self, *args, **kwargs):
+        super().__init__(*args, **kwargs)
+
+        common_classes = 'form-input-style'
+        for field in self.fields:
+            self.fields[field].widget.attrs.update({'class': common_classes})
+
+    def clean(self):
+        cleaned_data = super().clean()
+        wrongs = [
+            cleaned_data.get('wrong1'),
+            cleaned_data.get('wrong2'),
+            cleaned_data.get('wrong3'),
+        ]
+        if not any(wrongs):
+            raise forms.ValidationError("Please provide at least one wrong answer.")
+        return cleaned_data
+
+    def save(self, commit=True):
+        instance = super().save(commit=False)
+        instance.wrong_answers = list(filter(None, [
+            self.cleaned_data.get('wrong1'),
+            self.cleaned_data.get('wrong2'),
+            self.cleaned_data.get('wrong3')
+        ]))
+        if commit:
+            instance.save()
+        return instance
+
 
 class EditTestQuestionForm(forms.ModelForm):
     wrong1 = forms.CharField(label="", max_length=255, required=False)

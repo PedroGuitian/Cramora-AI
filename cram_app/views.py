@@ -365,3 +365,23 @@ def delete_question(request, question_id):
     hub_id = question.cram_hub.id
     question.delete()
     return redirect("cram_hub_dashboard", hub_id=hub_id)
+
+@login_required
+def add_question(request, hub_id):
+    hub = get_object_or_404(CramHub, id=hub_id, user=request.user)
+
+    if request.method == "POST":
+        form = TestQuestionForm(request.POST)
+        if form.is_valid():
+            question = form.save(commit=False)
+            question.cram_hub = hub
+            question.save()
+            return redirect("cram_hub_dashboard", hub_id=hub.id)
+    else:
+        form = TestQuestionForm()
+
+    return render(request, "cram_app/add_question.html", {
+        "form": form,
+        "hub": hub
+    })
+
