@@ -1,5 +1,6 @@
 @import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;600&display=swap');
 
+/* General tags */
 body {
   font-family: 'Inter', sans-serif;
   background-color: #f5f7fa;
@@ -32,31 +33,6 @@ nav a {
 
 nav a:hover {
   color: #322A88;
-}
-
-.nav-link {
-  all: unset;
-  display: inline-block;
-  color: #493DC7;
-  font-weight: 500;
-  margin: 0 15px;
-  cursor: pointer;
-  text-decoration: none;
-  background-color: transparent;  /* 👈 ensures no background */
-  border: none;
-  box-shadow: none;
-  padding: 0;
-  transition: color 0.3s ease, text-decoration 0.3s ease, transform 0.2s ease;
-}
-
-.nav-link:hover,
-.nav-link:focus {
-  color: #322A88;
-  text-decoration: underline;
-  transform: translateY(-2px);
-  background-color: transparent;  /* 👈 prevents hover background */
-  box-shadow: none;
-  outline: none;
 }
 
 textarea {
@@ -98,6 +74,382 @@ button:active {
   transform: translateY(0);
 }
 
+h2 {
+  font-size: 1.8rem;
+  font-weight: 600;
+  color: #333;
+  margin-bottom: 20px;
+}
+
+h3 {
+  font-size: 1.5rem;
+  font-weight: 500;
+  color: #555;
+  margin-bottom: 15px;
+}
+
+p {
+  font-size: 1rem;
+  color: #666;
+  margin-bottom: 20px;
+}
+
+/* layout.html */
+.nav-link {
+  all: unset;
+  display: inline-block;
+  color: #493DC7;
+  font-weight: 500;
+  margin: 0 15px;
+  cursor: pointer;
+  text-decoration: none;
+  background-color: transparent;  /* ensures no background */
+  border: none;
+  box-shadow: none;
+  padding: 0;
+  transition: color 0.3s ease, text-decoration 0.3s ease, transform 0.2s ease;
+}
+
+.nav-link:hover,
+.nav-link:focus {
+  color: #322A88;
+  text-decoration: underline;
+  transform: translateY(-2px);
+  background-color: transparent;  /* prevents hover background */
+  box-shadow: none;
+  outline: none;
+}
+
+/* add_question.html */
+.container-edit-question {
+  max-width: 800px;
+  margin: 40px auto;
+  background-color: #f0f2f5;
+  padding: 30px;
+  border-radius: 12px;
+  box-shadow: 0 8px 30px rgba(0, 0, 0, 0.1);
+}
+
+.form-wrapper {
+  padding: 0 20px; /* Equal left and right spacing */
+}
+
+a.button-link {
+  display: inline-block;
+  background-color: #493DC7;
+  color: white;
+  padding: 12px 20px;
+  border-radius: 8px;
+  text-decoration: none;
+  font-size: 0.95rem;
+  font-weight: 400;
+  font-family: inherit;
+  border: none;
+  box-sizing: border-box;
+  line-height: normal;
+  cursor: pointer;
+  transition: background-color 0.3s ease, transform 0.2s ease;
+  margin-top: 10px;
+}
+
+a.button-link:hover {
+  background-color: #322A88;
+  transform: translateY(-2px);
+}
+
+/* cram_hub_dashboard.html */
+
+/* a.button-link */
+
+/* a.button-link:hover */
+
+  .cram-sheet-markdown h2 {
+    font-size: 18px;
+    font-weight: bold;
+    margin-top: 1em;
+  }
+  
+  .cram-sheet-markdown ul {
+    padding-left: 20px;
+    margin: 0;
+  }
+  
+  .cram-sheet-markdown li {
+    margin-bottom: 4px;
+  }
+  
+  .cram-sheet-markdown p {
+    margin: 0.3em 0;
+  }
+
+  .question-list ul {
+    padding-left: 20px;
+    margin-top: 5px;
+    margin-bottom: 10px;
+  }
+
+  .question-box {
+    background-color: #f0f2f5;
+    padding: 20px;
+    border-radius: 10px;
+    margin-bottom: 20px;
+    box-shadow: 0 2px 6px rgba(0, 0, 0, 0.05);
+  }
+  
+  .question-box p {
+    margin: 5px 0;
+  }
+
+  .delete-link {
+    all: unset;
+    display: inline-block;
+    color: #493DC7;  /* color: #c53030; */
+    font-weight: 500;
+    cursor: pointer;
+    text-decoration: none;
+    background-color: transparent;  /* 👈 ensures no background */
+    border: none;
+    box-shadow: none;
+    padding: 0;
+    transition: color 0.3s ease, text-decoration 0.3s ease, transform 0.2s ease;
+  }
+  
+  .delete-link:hover,
+  .delete-link:focus {
+    color: #e63946;
+    text-decoration: underline;
+    transform: translateY(-2px);
+    background-color: transparent;  /* 👈 prevents hover background */
+    box-shadow: none;
+    outline: none;
+  }
+
+  .center-wrapper {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+  }
+
+  .modal-overlay {
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background: rgba(0, 0, 0, 0.4);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    z-index: 9999;
+  }
+
+  .modal {
+    background: white;
+    padding: 30px;
+    border-radius: 10px;
+    text-align: center;
+    font-family: sans-serif;
+    box-shadow: 0 4px 20px rgba(0, 0, 0, 0.2);
+  }
+
+  .ul_no_bullets {
+    list-style-type: none;
+    padding-left: 0;
+    font-size: 0.9rem;
+    margin-top: 10px;
+  }
+
+  .dropzone {
+    border: 2px dashed #493DC7;
+    border-radius: 8px;
+    padding: 20px;
+    text-align: center;
+    cursor: pointer;
+    background-color: #f9f9f9;
+    transition: background-color 0.3s ease;
+  }
+
+  .dropzone.highlight {
+    background-color: #e3f2fd;
+    border-color: #2196f3;
+  }
+
+  .dropzone .upload-icon{
+    font-size: 25px;
+    color: #493DC7;
+  }
+  
+  .drop-zone .upload-icon{
+    font-size: 30px;
+    color: #493DC7;
+  }
+
+  .spinner {
+    border: 6px solid #f3f3f3;
+    border-top: 6px solid #493DC5; /* Cramora purple */
+    border-radius: 50%;
+    width: 40px;
+    height: 40px;
+    animation: spin 1s linear infinite;
+    margin: 0 auto;
+  }
+
+  .pending-file-info {
+    flex-grow: 1;
+  }
+  
+  .pending-file-info small {
+    color: #6c757d;
+    display: block;
+    margin-top: 5px;
+  }
+  
+  .remove-file-btn {
+    background: none;
+    border: none;
+    color: #dc3545;
+    cursor: pointer;
+    padding: 4px 8px;
+    border-radius: 4px;
+    transition: background-color 0.2s;
+  }
+  
+  .remove-file-btn:hover {
+    background-color: #ffebee;
+  }
+
+/* create_cram_hub.html */
+.upload-form-container{
+  display: flex; /* Enable Flexbox */
+  justify-content: center; 
+  flex-direction: column; /* ← Stack children vertically */
+  align-items: center;
+  background-color: white;
+  width: 600px;
+  min-height: 350px;
+  padding: 30px;
+  border-radius: 30px;
+  position: relative; /* Ensure other elements can be positioned if needed */
+  margin: auto;
+}
+
+.drop-zone {
+  display: flex; /* Enable Flexbox */
+  justify-content: center; /* Horizontally center the .drop-zone */
+  align-items: center; /* Corrected comment */
+  border: 2px dashed #493DC7;
+  border-radius: 8px;
+  padding: 20px;
+  text-align: center;
+  cursor: pointer;
+  background-color: #f9f9f9;
+  transition: background-color 0.3s ease;
+  width: 500px;
+  height: 200px;
+  margin-top: 20px;
+}
+
+.drop-zone.drag-over {
+  background-color: #e6f2ff;
+}
+
+/* .dropzone .upload-icon */
+
+/* .drop-zone .upload-icon */
+
+/* .ul_no_bullets */
+
+/* .modal-overlay */
+
+/* .modal */
+
+/* edit_questions.html */
+
+/* .container-edit-question */
+
+/* form-wrapper */
+
+/* button-link */
+
+/* my_cram_hubs.html */
+
+/* ul_no_bullets */
+
+.cram_sheet_list{
+  color: #493DC7;
+  text-decoration: none;
+  font-weight: 500;
+  transition: color 0.3s ease;
+}
+
+/* quiz.html */
+
+/* .button-link */
+
+.card {
+  background: white;
+  border-radius: 16px;
+  box-shadow: 0 4px 16px rgba(0, 0, 0, 0.1);
+  padding: 2.5rem;
+  width: 100%;
+  max-width: 900px;
+  text-align: center;
+}
+
+.question-count {
+  font-size: 1rem;
+  font-weight: bold;
+  color: #555;
+  margin-bottom: 1rem;
+}
+
+.answers-grid {
+  display: grid;
+  grid-template-columns: 1fr;
+  gap: 1rem;
+  margin-top: 1.5rem;
+}
+
+.note {
+  margin-top: 1.5rem;
+  font-style: italic;
+  color: #666;
+}
+
+.missed-container {
+  display: flex;
+  flex-direction: column;
+  gap: 1.25rem;
+  margin-top: 1rem;
+}
+
+.missed-question {
+  background-color: #f0f2f5;
+  padding: 1rem 1.5rem;
+  border-left: 4px solid #dc3545;
+  border-radius: 10px;
+  box-shadow: 0 2px 6px rgba(0,0,0,0.05);
+  font-size: 0.95rem;
+  text-align: left;
+}
+
+/* login.html */
+
+/* .center-wrapper */
+
+/* .button */
+
+.log-in-box {
+  background-color: #f0f2f5;
+  max-width: 300px;
+  padding: 30px;
+  border: black 1px solid;
+  border-radius: 12px;
+  box-shadow: 0 8px 30px rgba(0, 0, 0, 0.1);
+}
+
+/* End */
+
 .cram-sheet {
   background: #f9f9f9;
   border-left: 5px solid #493DC7;
@@ -134,134 +486,6 @@ button:active {
   margin: 4px 0;
 }
 
-
-h2 {
-  font-size: 1.8rem;
-  font-weight: 600;
-  color: #333;
-  margin-bottom: 20px;
-}
-
-h3 {
-  font-size: 1.5rem;
-  font-weight: 500;
-  color: #555;
-  margin-bottom: 15px;
-}
-
-p {
-  font-size: 1rem;
-  color: #666;
-  margin-bottom: 20px;
-}
-
-.modal-overlay {
-  position: fixed;
-  top: 0;
-  left: 0;
-  width: 100%;
-  height: 100%;
-  background: rgba(0, 0, 0, 0.4); /* semi-transparent dark bg */
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  z-index: 999;
-}
-
-.modal {
-  background: white;
-  padding: 2rem;
-  border-radius: 12px;
-  max-width: 400px;
-  width: 100%;
-  box-shadow: 0 10px 30px rgba(0, 0, 0, 0.2);
-  text-align: center;
-}
-
-.cram_sheet_list{
-  color: #493DC7;
-  text-decoration: none;
-  font-weight: 500;
-  transition: color 0.3s ease;
-}
-
-.ul_no_bullets{
-  list-style-type: none;
-  padding: 0;
-}
-
-.dropzone {
-  border: 2px dashed #493DC7;
-  border-radius: 8px;
-  padding: 20px;
-  text-align: center;
-  cursor: pointer;
-  background-color: #f9f9f9;
-  transition: background-color 0.3s ease;
-}
-
-.dropzone.highlight {
-  background-color: #e6f2ff;
-}
-
-.modal-overlay {
-  position: fixed;
-  top: 0;
-  left: 0;
-  width: 100%;
-  height: 100%;
-  background: rgba(0, 0, 0, 0.4);
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  z-index: 999;
-}
-
-.modal {
-  background: white;
-  padding: 2rem;
-  border-radius: 12px;
-  max-width: 500px;
-  width: 100%;
-  box-shadow: 0 10px 30px rgba(0, 0, 0, 0.2);
-  text-align: center;
-}
-
-a.button-link {
-  display: inline-block;
-  background-color: #493DC7;
-  color: white;
-  padding: 12px 20px;
-  border-radius: 8px;
-  text-decoration: none;
-  font-size: 0.95rem;
-  font-weight: 400;
-  font-family: inherit;
-  border: none;
-  box-sizing: border-box;
-  line-height: normal;
-  cursor: pointer;
-  transition: background-color 0.3s ease, transform 0.2s ease;
-  margin-top: 10px;
-}
-
-a.button-link:hover {
-  background-color: #322A88;
-  transform: translateY(-2px);
-}
-
-.question-box {
-  background-color: #f0f2f5;
-  padding: 20px;
-  border-radius: 10px;
-  margin-bottom: 20px;
-  box-shadow: 0 2px 6px rgba(0, 0, 0, 0.05);
-}
-
-.question-box p {
-  margin: 5px 0;
-}
-
 .question-list ul {
   padding-left: 20px;
   margin-top: 5px;
@@ -293,30 +517,6 @@ a.button-link:hover {
   outline: none;
 }
 
-.delete-link {
-  all: unset;
-  display: inline-block;
-  color: #493DC7;  /* color: #c53030; */
-  font-weight: 500;
-  cursor: pointer;
-  text-decoration: none;
-  background-color: transparent;  /* 👈 ensures no background */
-  border: none;
-  box-shadow: none;
-  padding: 0;
-  transition: color 0.3s ease, text-decoration 0.3s ease, transform 0.2s ease;
-}
-
-.delete-link:hover,
-.delete-link:focus {
-  color: #e63946;
-  text-decoration: underline;
-  transform: translateY(-2px);
-  background-color: transparent;  /* 👈 prevents hover background */
-  box-shadow: none;
-  outline: none;
-}
-
 .form-input-style {
   font-family: 'Inter', sans-serif;
   width: 100%;
@@ -337,110 +537,12 @@ a.button-link:hover {
   outline: none;
 }
 
-.form-wrapper {
-  padding: 0 20px; /* Equal left and right spacing */
-}
 
-.container-edit-question {
-  max-width: 800px;
-  margin: 40px auto;
-  background-color: #f0f2f5;
-  padding: 30px;
-  border-radius: 12px;
-  box-shadow: 0 8px 30px rgba(0, 0, 0, 0.1);
-}
-
-.center-wrapper {
-  display: flex;
-  justify-content: center;
-  align-items: center;
-}
-
-.log-in-box {
-  background-color: #f0f2f5;
-  max-width: 300px;
-  padding: 30px;
-  border: black 1px solid;
-  border-radius: 12px;
-  box-shadow: 0 8px 30px rgba(0, 0, 0, 0.1);
-}
 /* create-cram-hub.html styling */
-.upload-form-container{
-  display: flex; /* Enable Flexbox */
-  justify-content: center; /* Horizontally center the .drop-zone */
-  flex-direction: column; /* ← Stack children vertically */
-  align-items: center; /* Vertically center the .drop-zone */
-  background-color: white;
-  width: 600px;
-  min-height: 350px;
-  padding: 30px;
-  border-radius: 30px;
-  position: relative; /* Ensure other elements can be positioned if needed */
-  margin: auto;
-}
 #hub-form label{
   font-weight: bold;
 }
-.drop-zone {
-  display: flex; /* Enable Flexbox */
-  justify-content: center; /* Horizontally center the .drop-zone */
-  align-items: center; /* Vertically center the .drop-zone */
-  border: 2px dashed #493DC7;
-  border-radius: 8px;
-  padding: 20px;
-  text-align: center;
-  cursor: pointer;
-  background-color: #f9f9f9;
-  transition: background-color 0.3s ease;
-  width: 500px;
-  height: 200px;
-  margin-top: 20px;
-}
 
-.drop-zone.drag-over {
-  background-color: #e6f2ff;
-}
-
-.drop-zone .upload-icon{
-  font-size: 30px;
-  color: #493DC7;
-}
-
-.modal-overlay {
-  position: fixed;
-  top: 0;
-  left: 0;
-  width: 100%;
-  height: 100%;
-  background: rgba(0, 0, 0, 0.4);
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  z-index: 999;
-}
-
-.modal {
-  background: white;
-  padding: 2rem;
-  border-radius: 12px;
-  max-width: 400px;
-  width: 100%;
-  box-shadow: 0 10px 30px rgba(0, 0, 0, 0.2);
-  text-align: center;
-}
-
-.ul_no_bullets {
-  list-style-type: none;
-  padding-left: 0;
-  font-size: 0.9rem;
-  margin-top: 10px;
-}
-
-/* cram_hub_dashboard.html styling */
-.dropzone .upload-icon{
-  font-size: 25px;
-  color: #493DC7;
-}
 .pending-file-item {
   display: flex;
   justify-content: space-between;
@@ -452,123 +554,21 @@ a.button-link:hover {
   border: 1px solid #dee2e6;
 }
 
-.pending-file-info {
-  flex-grow: 1;
-}
-
-.pending-file-info small {
-  color: #6c757d;
-  display: block;
-  margin-top: 5px;
-}
-
-.remove-file-btn {
-  background: none;
-  border: none;
-  color: #dc3545;
-  cursor: pointer;
-  padding: 4px 8px;
-  border-radius: 4px;
-  transition: background-color 0.2s;
-}
-
-.remove-file-btn:hover {
-  background-color: #ffebee;
-}
-
-.dropzone.highlight {
-  background-color: #e3f2fd;
-  border-color: #2196f3;
-}
-
-.modal-overlay {
-  position: fixed;
-  top: 0;
-  left: 0;
-  width: 100%;
-  height: 100%;
-  background: rgba(0, 0, 0, 0.4);
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  z-index: 9999;
-}
-
-.modal {
-  background: white;
-  padding: 30px;
-  border-radius: 10px;
-  text-align: center;
-  font-family: sans-serif;
-  box-shadow: 0 4px 20px rgba(0, 0, 0, 0.2);
-}
-
-.spinner {
-  border: 6px solid #f3f3f3;
-  border-top: 6px solid #493DC5; /* Cramora purple */
-  border-radius: 50%;
-  width: 40px;
-  height: 40px;
-  animation: spin 1s linear infinite;
-  margin: 0 auto;
-}
-
 @keyframes spin {
   0% { transform: rotate(0deg); }
   100% { transform: rotate(360deg); }
 }
 
-.cram-sheet-markdown h2 {
-  font-size: 18px;
-  font-weight: bold;
-  margin-top: 1em;
-}
-
-.cram-sheet-markdown ul {
-  padding-left: 20px;
-  margin: 0;
-}
-
-.cram-sheet-markdown li {
-  margin-bottom: 4px;
-}
-
-.cram-sheet-markdown p {
-  margin: 0.3em 0;
-}
-
 /* quiz.html */
+
+/* .button-link */
+
 #quiz-container {
   display: flex;
   justify-content: center;
   padding: 2rem;
 }
 
-.card {
-  background: white;
-  border-radius: 16px;
-  box-shadow: 0 4px 16px rgba(0, 0, 0, 0.1);
-  padding: 2.5rem;
-  width: 100%;
-  max-width: 900px;
-  text-align: center;
-}
-
-/* Question tracker */
-.question-count {
-  font-size: 1rem;
-  font-weight: bold;
-  color: #555;
-  margin-bottom: 1rem;
-}
-
-/* Two-column answer layout */
-.answers-grid {
-  display: grid;
-  grid-template-columns: 1fr;
-  gap: 1rem;
-  margin-top: 1.5rem;
-}
 
 @media (min-width: 768px) {
   .answers-grid {
@@ -606,53 +606,4 @@ a.button-link:hover {
 .answer-btn:disabled {
   opacity: 0.95;
   cursor: not-allowed;
-}
-
-/* Note */
-.note {
-  margin-top: 1.5rem;
-  font-style: italic;
-  color: #666;
-}
-
-/* Missed Questions */
-.missed-container {
-  display: flex;
-  flex-direction: column;
-  gap: 1.25rem;
-  margin-top: 1rem;
-}
-
-.missed-question {
-  background-color: #f0f2f5;
-  padding: 1rem 1.5rem;
-  border-left: 4px solid #dc3545;
-  border-radius: 10px;
-  box-shadow: 0 2px 6px rgba(0,0,0,0.05);
-  font-size: 0.95rem;
-  text-align: left;
-}
-
-/* Back Button (inherits button-link style) */
-a.button-link {
-  display: inline-block;
-  background-color: #493DC7;
-  color: white;
-  padding: 12px 20px;
-  border-radius: 8px;
-  text-decoration: none;
-  font-size: 0.95rem;
-  font-weight: 400;
-  font-family: inherit;
-  border: none;
-  box-sizing: border-box;
-  line-height: normal;
-  cursor: pointer;
-  transition: background-color 0.3s ease, transform 0.2s ease;
-  margin-top: 10px;
-}
-
-a.button-link:hover {
-  background-color: #322A88;
-  transform: translateY(-2px);
 }
