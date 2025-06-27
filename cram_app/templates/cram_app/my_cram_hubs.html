@@ -3,20 +3,22 @@
 {% block title %}My Cram Hubs{% endblock %}
 
 {% block content %}
-  <h2>My Cram Hubs</h2>
+  <div class="my-hubs-container">
+    <h2 class="page-heading">My Cram Hubs</h2>
 
-  {% if hubs %}
-    <ul class="ul_no_bullets">
-      {% for hub in hubs %}
-        <li style="margin-bottom: 10px;">
-          <a href="{% url 'cram_hub_dashboard' hub.id %}" class="cram_sheet_list">
-            {{ hub.title }}
-          </a>
-          <hr>
-        </li>
-      {% endfor %}
-    </ul>
-  {% else %}
-    <p>You haven't created any cram hubs yet.</p>
-  {% endif %}
+    {% if hubs %}
+      <ul class="hub-list">
+        {% for hub in hubs %}
+          <li class="hub-list-item">
+            <a href="{% url 'cram_hub_dashboard' hub.id %}" class="hub-link">
+              {{ hub.title }}
+            </a>
+          </li>
+        {% endfor %}
+      </ul>
+    {% else %}
+      <p class="no-hubs-msg">You haven't created any cram hubs yet.</p>
+    {% endif %}
+  </div>
 {% endblock %}
+

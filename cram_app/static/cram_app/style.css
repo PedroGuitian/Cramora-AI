@@ -350,6 +350,43 @@ a.button-link:hover {
     background-color: #ffebee;
   }
 
+  .dashboard-container {
+    max-width: 1000px;
+    margin: 0 auto 3rem;
+    background: linear-gradient(135deg, #f5f7ff 0%, #e7e5fa 100%);
+    padding: 2.5rem;
+    border-radius: 20px;
+    box-shadow: 0 12px 30px rgba(73, 61, 199, 0.08);
+  }
+  
+  .page-heading {
+    font-size: 2rem;
+    color: #493DC7;
+    margin-bottom: 2rem;
+    text-align: center;
+  }
+  
+  .section-heading {
+    font-size: 1.5rem;
+    color: #493DC7;
+    margin-top: 2.5rem;
+    margin-bottom: 1rem;
+  }
+  
+  .dashboard-actions {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 1rem;
+    justify-content: center;
+    margin-bottom: 2rem;
+  }
+  
+  .dashboard-actions button,
+  .dashboard-actions a.button-link {
+    margin-top: 0;
+  }
+  
+
 /* create_cram_hub.html */
 .upload-form-container{
   display: flex; /* Enable Flexbox */
@@ -405,13 +442,59 @@ a.button-link:hover {
 
 /* my_cram_hubs.html */
 
-/* ul_no_bullets */
 
-.cram_sheet_list{
+.my-hubs-container {
+  max-width: 1000px;
+  margin: 0 auto 3rem;
+  background: linear-gradient(135deg, #f5f7ff 0%, #e7e5fa 100%);
+  padding: 2.5rem;
+  border-radius: 20px;
+  box-shadow: 0 12px 30px rgba(73, 61, 199, 0.08);
+}
+
+.page-heading {
+  font-size: 2rem;
   color: #493DC7;
+  margin-bottom: 2rem;
+  text-align: center;
+}
+
+.hub-list {
+  list-style: none;
+  padding: 0;
+  margin: 0;
+}
+
+.hub-list-item {
+  background-color: white;
+  border-radius: 12px;
+  margin-bottom: 1.2rem;
+  box-shadow: 0 4px 16px rgba(0, 0, 0, 0.06);
+  transition: transform 0.2s ease, box-shadow 0.2s ease;
+}
+
+.hub-list-item:hover {
+  transform: translateY(-3px);
+  box-shadow: 0 10px 24px rgba(0, 0, 0, 0.08);
+}
+
+.hub-link {
+  display: block;
+  padding: 1.2rem 1.5rem;
   text-decoration: none;
+  color: #493DC7;
+  font-size: 1.1rem;
   font-weight: 500;
-  transition: color 0.3s ease;
+}
+
+.hub-link:hover {
+  color: #322A88;
+}
+
+.no-hubs-msg {
+  text-align: center;
+  color: #666;
+  font-size: 1.1rem;
 }
 
 /* quiz.html */
