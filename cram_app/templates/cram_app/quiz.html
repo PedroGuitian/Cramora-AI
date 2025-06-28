@@ -3,7 +3,7 @@
 {% block title %}Take Quiz - {{ hub.title }}{% endblock %}
 
 {% block content %}
-<h2 style="text-align: center;">Quiz - {{ hub.title }}</h2>
+<h2 style="text-align: center;" id="quiz-title">Quiz - {{ hub.title }}</h2>
 
 <div id="quiz-container">
   <div id="question-card" class="card hidden">
@@ -99,6 +99,7 @@ container.addEventListener("click", (e) => {
 });
 
 function showResults() {
+  document.getElementById("quiz-title").style.display = "none";
   const score = Math.round((correctCount / quizQuestions.length) * 100);
   let resultHTML = `
     <h3>Quiz Completed!</h3>
