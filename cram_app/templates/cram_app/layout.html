@@ -15,7 +15,7 @@
     <nav class="sidebar">
       <img src="{% static 'cram_app/images/cramora-logo.png' %}" alt="Cramora AI" class="logo-img">
       <a href="{% url 'home' %}" class="nav-link {% active_class 'home' %}">Home</a>
-      <a href="{% url 'my_cram_hubs' %}" class="nav-link {% active_class 'my_cram_hubs' %}">My Cram Hubs</a>
+      <a href="{% url 'my_cram_hubs' %}" class="nav-link {% active_class 'my_cram_hubs' 'cram_hub_dashboard' 'take_quiz' 'add_question' 'edit_question'%}">My Cram Hubs</a>
       <a href="{% url 'create_cram_hub' %}" class="nav-link {% active_class 'create_cram_hub' %}">New Cram Hub</a>
       <a href="" class="nav-link">Settings</a>
       <form method="post" action="{% url 'logout' %}">

@@ -23,8 +23,10 @@
         <p style="color: red;">{{ form.non_field_errors }}</p>
       {% endif %}
 
-      <button type="submit">Create Question</button>
-      <a href="{% url 'cram_hub_dashboard' hub.id %}" class="button-link" style="margin-left: 10px;">Back</a>
+      <div class="button-group">
+        <button type="submit" class="button-link">Create Question</button>
+        <a href="{% url 'cram_hub_dashboard' hub.id %}" class="button-link" style="margin-left: 10px;">Back</a>
+      </div>
     </form>
   </div>
 {% endblock %}
