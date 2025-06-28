@@ -648,53 +648,132 @@ a.button-link:hover {
 /* quiz.html */
 
 /* .button-link */
-
+/* Quiz Card */
 .card {
-  background: white;
-  border-radius: 16px;
-  box-shadow: 0 4px 16px rgba(0, 0, 0, 0.1);
+  background: linear-gradient(135deg, #f5f7ff 0%, #e7e5fa 100%);
+  border-radius: 20px;
+  box-shadow: 0 12px 30px rgba(73, 61, 199, 0.1);
   padding: 2.5rem;
   width: 100%;
   max-width: 900px;
   text-align: center;
 }
 
+/* Question count */
 .question-count {
   font-size: 1rem;
-  font-weight: bold;
-  color: #555;
+  font-weight: 500;
+  color: #493DC7;
   margin-bottom: 1rem;
 }
 
+/* Answers grid */
 .answers-grid {
   display: grid;
   grid-template-columns: 1fr;
   gap: 1rem;
-  margin-top: 1.5rem;
+  margin-top: 2rem;
 }
 
+@media (min-width: 768px) {
+  .answers-grid {
+    grid-template-columns: 1fr 1fr;
+  }
+}
+
+/* Answer buttons */
+.answer-btn {
+  background-color: white;
+  color: #493DC7;
+  border: 2px solid #493DC7;
+  border-radius: 12px;
+  padding: 1rem;
+  font-size: 1rem;
+  font-weight: 500;
+  cursor: pointer;
+  transition: all 0.3s ease;
+}
+
+.answer-btn:hover:not(:disabled) {
+  background-color: #f0f2f5;
+}
+
+.answer-btn.correct {
+  border-color: #28a745;
+  background-color: #e6ffe6;
+  color: #28a745;
+}
+
+.answer-btn.wrong {
+  border-color: #dc3545;
+  background-color: #ffe6e6;
+  color: #dc3545;
+}
+
+.answer-btn:disabled {
+  opacity: 0.95;
+  cursor: not-allowed;
+}
+
+/* Note for next question */
 .note {
   margin-top: 1.5rem;
   font-style: italic;
   color: #666;
 }
 
+/* Missed questions section */
 .missed-container {
   display: flex;
   flex-direction: column;
   gap: 1.25rem;
-  margin-top: 1rem;
+  margin-top: 2rem;
 }
 
 .missed-question {
   background-color: #f0f2f5;
-  padding: 1rem 1.5rem;
+  padding: 1.2rem 1.5rem;
   border-left: 4px solid #dc3545;
-  border-radius: 10px;
+  border-radius: 12px;
   box-shadow: 0 2px 6px rgba(0,0,0,0.05);
   font-size: 0.95rem;
   text-align: left;
 }
+
+.missed-question strong {
+  color: #493DC7;
+}
+
+/* Headings in quiz card */
+.card h3 {
+  font-size: 1.6rem;
+  color: #493DC7;
+  margin-bottom: 1.2rem;
+}
+
+.card p {
+  font-size: 1rem;
+  color: #555;
+}
+
+/* Back button consistency */
+.button-link {
+  display: inline-block;
+  background-color: #493DC7;
+  color: white;
+  padding: 0.9rem 1.8rem;
+  border-radius: 10px;
+  text-decoration: none;
+  font-size: 1rem;
+  font-weight: 500;
+  transition: background-color 0.3s ease, transform 0.2s ease;
+}
+
+.button-link:hover {
+  background-color: #322A88;
+  transform: translateY(-2px);
+}
+
 
 /* login.html */
 
