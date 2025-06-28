@@ -4,33 +4,48 @@
 
 {% block content %}
   <div class="dashboard-container">
-    <h2 class="page-heading">Dashboard - {{ hub.title }}</h2>
+    <h2 class="page-heading">Dashboard – {{ hub.title }}</h2>
+    <p class="dashboard-subtitle">Upload files, generate smart notes, and quiz yourself smarter.</p>
 
     <!-- Action Buttons -->
     <div class="dashboard-actions">
-      <button onclick="openFileModal()">View Uploaded Files</button>
+      <button onclick="openFileModal()">
+        <i class="fas fa-folder-open"></i> View Uploaded Files
+      </button>
 
       {% if hub.cramsheet %}
-        <button onclick="toggleCramSheet()">Show/Hide Study Guide</button>
+        <button onclick="toggleCramSheet()">
+          <i class="fas fa-eye-slash"></i> Show/Hide Study Guide
+        </button>
       {% else %}
-        <a href="{% url 'generate_cram_sheet' hub.id %}" class="button-link">Generate Cram Sheet</a>
+        <a href="{% url 'generate_cram_sheet' hub.id %}" class="button-link">
+          <i class="fas fa-magic"></i> Generate Cram Sheet
+        </a>
       {% endif %}
 
       {% if show_questions %}
-        <button id="generateQuestionsBtn" class="button-link">Generate More Questions</button>
+        <button id="generateQuestionsBtn" class="button-link">
+          <i class="fas fa-plus-circle"></i> Generate More Questions
+        </button>
       {% else %}
-        <button id="generateQuestionsBtn" class="button-link">Generate Questions</button>
+        <button id="generateQuestionsBtn" class="button-link">
+          <i class="fas fa-question-circle"></i> Generate Questions
+        </button>
       {% endif %}
 
-      <a href="{% url 'take_quiz' hub.id %}" class="button-link">Take Quiz</a>
+      <a href="{% url 'take_quiz' hub.id %}" class="button-link">
+        <i class="fas fa-clipboard-list"></i> Take Quiz
+      </a>
     </div>
 
-    <div id="cram-sheet" style="display: none; margin-top: 30px;" class="cram-sheet-markdown">
+    <!-- Cram Sheet Display -->
+    <div id="cram-sheet" style="display: none;" class="cram-sheet-markdown">
       <hr>
-      <h3>Cram Sheet - {{ hub.title }}</h3>
+      <h3>Cram Sheet – {{ hub.title }}</h3>
       {{ hub.cramsheet.content|safe }}
     </div>
 
+    <!-- Questions -->
     {% if hub.questions.exists %}
       <hr>
       <h3 class="section-heading">Cram Questions</h3>
@@ -45,7 +60,9 @@
               </a>
               <form action="{% url 'delete_question' q.id %}" method="post" style="display:inline;">
                 {% csrf_token %}
-                <button type="submit" class="delete-link" title="Delete"><i class="fas fa-trash"></i></button>
+                <button type="submit" class="delete-link" title="Delete">
+                  <i class="fas fa-trash"></i>
+                </button>
               </form>
             </div>
           </div>
@@ -53,8 +70,54 @@
       </div>
     {% endif %}
 
+    <!-- Add Question -->
     <div class="center-wrapper">
-      <a href="{% url 'add_question' hub.id %}" class="button-link">Add Question</a>
+      <a href="{% url 'add_question' hub.id %}" class="button-link">
+        <i class="fas fa-plus"></i> Add Question
+      </a>
+    </div>
+  </div>
+
+  <!-- File Modal -->
+  <div id="fileModal" class="modal-overlay" style="display:none;">
+    <div class="modal">
+      <h3>Uploaded Files</h3>
+      <ul id="fileList" class="ul_no_bullets" style="text-align: left;">
+        {% for f in hub.files.all %}
+          <li>
+            <a href="{{ f.file.url }}" target="_blank" style="color: #007bff; text-decoration: underline;" class="uploaded-file-link">
+              {{ f.original_filename }}
+              <span class="file-size" data-url="{{ f.file.url }}"></span>
+            </a>
+          </li>
+        {% endfor %}
+      </ul>
+
+      <hr style="margin: 20px 0;">
+
+      <h4>Files to Upload (Not Yet Submitted)</h4>
+      <ul id="pendingFilesList" class="ul_no_bullets" style="margin-bottom: 10px;"></ul>
+
+      <form method="post" action="{% url 'add_files_to_hub' hub.id %}" enctype="multipart/form-data" id="uploadMoreForm">
+        {% csrf_token %}
+        <div id="dropzone" class="dropzone">
+          <i class="fas fa-cloud-upload-alt upload-icon"></i>
+          <p>Drag and drop your files or click here to upload</p>
+          <p>Maximum size: 25MB</p>
+          <input type="file" name="files" accept=".pdf,.doc,.docx,.ppt,.pptx,.txt" multiple required style="display:none;" id="moreFiles">
+        </div>
+        <br>
+        <button type="submit">Submit</button>
+        <button type="button" onclick="closeFileModal()" style="margin-left: 10px;">Close</button>
+      </form>
+    </div>
+  </div>
+
+  <!-- Loading Modal -->
+  <div id="loadingModal" class="modal-overlay" style="display: none;">
+    <div class="modal">
+      <div class="spinner"></div>
+      <p style="margin-top: 10px;">Loading content...</p>
     </div>
   </div>
 

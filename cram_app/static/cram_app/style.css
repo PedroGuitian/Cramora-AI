@@ -153,18 +153,6 @@ p {
 }
 
 /* add_question.html */
-.container-edit-question {
-  max-width: 800px;
-  margin: 40px auto;
-  background-color: #f0f2f5;
-  padding: 30px;
-  border-radius: 12px;
-  box-shadow: 0 8px 30px rgba(0, 0, 0, 0.1);
-}
-
-.form-wrapper {
-  padding: 0 20px; /* Equal left and right spacing */
-}
 
 a.button-link {
   display: inline-block;
@@ -187,6 +175,58 @@ a.button-link {
 a.button-link:hover {
   background-color: #322A88;
   transform: translateY(-2px);
+}
+
+.container-edit-question {
+  max-width: 1000px;
+  margin: 40px auto;
+  background: linear-gradient(135deg, #f5f7ff 0%, #e7e5fa 100%);
+  padding: 2.5rem;
+  border-radius: 20px;
+  box-shadow: 0 12px 30px rgba(73, 61, 199, 0.1);
+}
+
+.container-edit-question h2 {
+  font-size: 2rem;
+  color: #493DC7;
+  margin-bottom: 1.5rem;
+  text-align: center;
+}
+
+.form-wrapper label {
+  display: block;
+  margin-top: 1rem;
+  margin-bottom: 0.5rem;
+  color: #493DC7;
+  font-weight: 500;
+}
+
+.form-wrapper input[type="text"],
+.form-wrapper textarea,
+.form-wrapper select {
+  width: 100%;
+  padding: 0.8rem;
+  border: 1px solid #ccc;
+  border-radius: 8px;
+  font-size: 1rem;
+  font-family: 'Inter', sans-serif;
+  box-shadow: inset 0 2px 5px rgba(0, 0, 0, 0.05);
+  transition: border-color 0.3s ease;
+}
+
+.form-wrapper input[type="text"]:focus,
+.form-wrapper textarea:focus,
+.form-wrapper select:focus {
+  border-color: #493DC7;
+  outline: none;
+}
+
+.button-group {
+  display: flex;
+  justify-content: center;
+  gap: 10px; /* space between buttons */
+  flex-wrap: wrap;
+  margin-top: 1.5rem;
 }
 
 /* cram_hub_dashboard.html */
@@ -213,38 +253,6 @@ a.button-link:hover {
   .cram-sheet-markdown p {
     margin: 0.3em 0;
   }
-
-  .question-list ul {
-    padding-left: 20px;
-    margin-top: 5px;
-    margin-bottom: 10px;
-  }
-
-  .question-box {
-    background-color: #f0f2f5;
-    padding: 20px;
-    border-radius: 10px;
-    margin-bottom: 20px;
-    box-shadow: 0 2px 6px rgba(0, 0, 0, 0.05);
-  }
-  
-  .question-box p {
-    margin: 5px 0;
-  }
-
-  .delete-link {
-    all: unset;
-    display: inline-block;
-    color: #493DC7;  /* color: #c53030; */
-    font-weight: 500;
-    cursor: pointer;
-    text-decoration: none;
-    background-color: transparent;  /* 👈 ensures no background */
-    border: none;
-    box-shadow: none;
-    padding: 0;
-    transition: color 0.3s ease, text-decoration 0.3s ease, transform 0.2s ease;
-  }
   
   .delete-link:hover,
   .delete-link:focus {
@@ -256,59 +264,11 @@ a.button-link:hover {
     outline: none;
   }
 
-  .center-wrapper {
-    display: flex;
-    justify-content: center;
-    align-items: center;
-  }
-
-  .modal-overlay {
-    position: fixed;
-    top: 0;
-    left: 0;
-    width: 100%;
-    height: 100%;
-    background: rgba(0, 0, 0, 0.4);
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    z-index: 9999;
-  }
-
-  .modal {
-    background: white;
-    padding: 30px;
-    border-radius: 10px;
-    text-align: center;
-    font-family: sans-serif;
-    box-shadow: 0 4px 20px rgba(0, 0, 0, 0.2);
-  }
-
   .ul_no_bullets {
     list-style-type: none;
     padding-left: 0;
     font-size: 0.9rem;
     margin-top: 10px;
-  }
-
-  .dropzone {
-    border: 2px dashed #493DC7;
-    border-radius: 8px;
-    padding: 20px;
-    text-align: center;
-    cursor: pointer;
-    background-color: #f9f9f9;
-    transition: background-color 0.3s ease;
-  }
-
-  .dropzone.highlight {
-    background-color: #e3f2fd;
-    border-color: #2196f3;
-  }
-
-  .dropzone .upload-icon{
-    font-size: 25px;
-    color: #493DC7;
   }
   
   .drop-zone .upload-icon{
@@ -335,20 +295,6 @@ a.button-link:hover {
     display: block;
     margin-top: 5px;
   }
-  
-  .remove-file-btn {
-    background: none;
-    border: none;
-    color: #dc3545;
-    cursor: pointer;
-    padding: 4px 8px;
-    border-radius: 4px;
-    transition: background-color 0.2s;
-  }
-  
-  .remove-file-btn:hover {
-    background-color: #ffebee;
-  }
 
   .dashboard-container {
     max-width: 1000px;
@@ -359,33 +305,235 @@ a.button-link:hover {
     box-shadow: 0 12px 30px rgba(73, 61, 199, 0.08);
   }
   
-  .page-heading {
-    font-size: 2rem;
-    color: #493DC7;
-    margin-bottom: 2rem;
-    text-align: center;
-  }
   
-  .section-heading {
-    font-size: 1.5rem;
-    color: #493DC7;
-    margin-top: 2.5rem;
-    margin-bottom: 1rem;
-  }
-  
-  .dashboard-actions {
-    display: flex;
-    flex-wrap: wrap;
-    gap: 1rem;
-    justify-content: center;
-    margin-bottom: 2rem;
-  }
-  
-  .dashboard-actions button,
-  .dashboard-actions a.button-link {
-    margin-top: 0;
-  }
-  
+/* === Headings === */
+
+.dashboard-subtitle {
+  font-size: 1.05rem;
+  color: #666;
+  text-align: center;
+  margin-top: -0.5rem;
+  margin-bottom: 2.5rem;
+}
+
+.section-heading {
+  font-size: 1.5rem;
+  color: #493DC7;
+  margin: 2rem 0 1rem;
+}
+
+/* === Dashboard Action Buttons === */
+.dashboard-actions {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 1rem;
+  justify-content: center;
+  margin-bottom: 2rem;
+}
+
+.dashboard-actions button,
+.dashboard-actions a.button-link {
+  background-color: #493DC7;
+  color: white;
+  padding: 0.75rem 1.5rem;
+  border-radius: 10px;
+  font-weight: 500;
+  font-size: 1rem;
+  text-decoration: none;
+  border: none;
+  transition: all 0.3s ease;
+  display: inline-flex;
+  align-items: center;
+  gap: 0.5rem;
+  cursor: pointer;
+}
+
+.dashboard-actions button:hover,
+.dashboard-actions a.button-link:hover {
+  background-color: #322A88;
+  transform: translateY(-2px);
+}
+
+.dashboard-actions i {
+  font-size: 1rem;
+}
+
+/* === Cram Sheet Box === */
+#cram-sheet {
+  background-color: white;
+  border-radius: 15px;
+  padding: 2rem;
+  box-shadow: 0 6px 16px rgba(0, 0, 0, 0.05);
+  margin-top: 2rem;
+}
+
+/* === Question Cards === */
+.question-box {
+  background-color: white;
+  padding: 1.5rem;
+  border-radius: 12px;
+  margin-bottom: 20px;
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.04);
+  transition: transform 0.2s ease;
+}
+
+.question-box:hover {
+  transform: translateY(-2px);
+}
+
+.question-box p {
+  margin: 6px 0;
+  color: #333;
+}
+
+.question-box strong {
+  color: #493DC7;
+}
+
+/* === Icons for Edit/Delete === */
+.edit-link i,
+.delete-link i {
+  font-size: 1.1rem;
+}
+
+.edit-link:hover {
+  color: #322A88;
+}
+
+.delete-link {
+  all: unset;
+  color: #493DC7;
+  cursor: pointer;
+  transition: transform 0.2s ease;
+}
+
+/* === Add Question === */
+.center-wrapper {
+  margin-top: 2.5rem;
+  text-align: center;
+}
+
+/* Modal overlay (already exists, just confirming) */
+.modal-overlay {
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  background: rgba(0, 0, 0, 0.4);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  z-index: 9999;
+}
+
+/* Modal box style */
+.modal {
+  background: linear-gradient(135deg, #f5f7ff 0%, #e7e5fa 100%);
+  padding: 2rem;
+  border-radius: 15px;
+  max-width: 600px;
+  width: 90%;
+  text-align: center;
+  box-shadow: 0 12px 30px rgba(73, 61, 199, 0.15);
+  font-family: 'Inter', sans-serif;
+}
+
+/* Modal headings */
+.modal h3 {
+  font-size: 1.5rem;
+  color: #493DC7;
+  margin-bottom: 1rem;
+}
+
+.modal h4 {
+  font-size: 1.2rem;
+  color: #555;
+  margin-top: 1.5rem;
+}
+
+/* Uploaded file links */
+.uploaded-file-link {
+  color: #493DC7;
+  text-decoration: none;
+  font-weight: 500;
+  transition: color 0.3s ease;
+}
+
+.uploaded-file-link:hover {
+  color: #322A88;
+  text-decoration: underline;
+}
+
+/* Dropzone style */
+.dropzone {
+  border: 2px dashed #493DC7;
+  border-radius: 10px;
+  padding: 1.5rem;
+  background-color: #f9f9f9;
+  cursor: pointer;
+  transition: background-color 0.3s ease, border-color 0.3s ease;
+}
+
+.dropzone.highlight {
+  background-color: #e7e5fa;
+  border-color: #322A88;
+}
+
+.dropzone .upload-icon {
+  font-size: 2rem;
+  color: #493DC7;
+  margin-bottom: 0.5rem;
+}
+
+/* Buttons inside modal */
+.modal button {
+  background-color: #493DC7;
+  color: white;
+  padding: 0.7rem 1.5rem;
+  border: none;
+  border-radius: 8px;
+  margin-top: 10px;
+  cursor: pointer;
+  font-size: 0.95rem;
+  font-weight: 500;
+  transition: background-color 0.3s ease, transform 0.2s ease;
+}
+
+.modal button:hover {
+  background-color: #322A88;
+  transform: translateY(-2px);
+}
+
+/* Pending file item layout */
+.pending-file-item {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  background: white;
+  border: 1px solid #eee;
+  padding: 0.7rem 1rem;
+  border-radius: 8px;
+  margin-bottom: 0.5rem;
+}
+
+.pending-file-info strong {
+  color: #493DC7;
+}
+
+.remove-file-btn {
+  background: none;
+  border: none;
+  color: #493DC7;
+  cursor: pointer;
+  transition: color 0.2s ease;
+}
+
+.remove-file-btn:hover {
+  color: #dc3545;
+  /* color: #a4161a; */
+}
+
 
 /* create_cram_hub.html */
 .upload-form-container{
