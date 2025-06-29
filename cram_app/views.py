@@ -31,6 +31,7 @@ def signup_view(request):
         form = UserCreationForm()
     return render(request, "cram_app/signup.html", {"form": form})
 
+@login_required
 def home(request):
     return render(request, "cram_app/home.html")
 
