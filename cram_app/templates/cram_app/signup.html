@@ -1,10 +1,28 @@
 {% extends "cram_app/layout.html" %}
 
+{% block title %}Sign Up{% endblock %}
+
 {% block content %}
-  <h2>Sign Up</h2>
-  <form method="post">
-    {% csrf_token %}
-    {{ form.as_p }}
-    <button type="submit">Sign Up</button>
-  </form>
+  <div class="auth-container">
+    <div class="auth-card">
+      <h2>Join Cramora AI 🚀</h2>
+      <p>Create your account below.</p>
+      <form method="post">
+        {% csrf_token %}
+        <div class="form-wrapper">
+          {% for field in form %}
+            <label for="{{ field.id_for_label }}">{{ field.label }}</label>
+            {{ field }}
+            {% if field.errors %}
+              <div class="field-error">{{ field.errors }}</div>
+            {% endif %}
+          {% endfor %}
+        </div>
+        <button type="submit">Sign Up</button>
+      </form>
+      <p class="auth-switch-text">
+        Already have an account? <a href="{% url 'login' %}">Log in</a>
+      </p>
+    </div>
+  </div>
 {% endblock %}
