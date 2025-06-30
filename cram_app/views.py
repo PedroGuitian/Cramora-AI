@@ -11,24 +11,28 @@ from django.core.serializers.json import DjangoJSONEncoder
 from django.views.decorators.http import require_POST
 from .models import CramHub, UploadedFile, CramSheet, TestQuestion
 from django.utils.safestring import mark_safe
+from .forms import CustomUserCreationForm
+from .forms import CustomUserCreationForm, CustomAuthenticationForm
+
 
 client = OpenAI(api_key=os.getenv("OPENAI_API_KEY"))
 
 class CustomLoginView(LoginView):
     template_name = 'cram_app/login.html'
+    authentication_form = CustomAuthenticationForm
 
 class CustomLogoutView(LogoutView):
     next_page = 'login'  # Redirect to login after logout
 
 def signup_view(request):
     if request.method == "POST":
-        form = UserCreationForm(request.POST)
+        form = CustomUserCreationForm(request.POST)
         if form.is_valid():
             user = form.save()
             login(request, user)
             return redirect("home")
     else:
-        form = UserCreationForm()
+        form = CustomUserCreationForm()
     return render(request, "cram_app/signup.html", {"form": form})
 
 @login_required
