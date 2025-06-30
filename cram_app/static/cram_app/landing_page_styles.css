@@ -1,0 +1,107 @@
+@import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700&display=swap');
+
+body {
+  margin: 0;
+  padding: 0;
+  font-family: 'Inter', sans-serif;
+  background-color: #f5f7fa;
+  color: #333;
+}
+
+.plans-container {
+  max-width: 1000px;
+  margin: 50px auto;
+  padding: 0 20px;
+  text-align: center;
+}
+
+.trial-note {
+  color: #493DC7;
+  font-weight: 600;
+  margin-bottom: 30px;
+}
+
+.plan-cards {
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: center;
+  gap: 30px;
+}
+
+.plan-card {
+  background-color: #fff;
+  border: 2px solid #ddd;
+  border-radius: 16px;
+  box-shadow: 0 8px 20px rgba(73, 61, 199, 0.1);
+  width: 280px;
+  padding: 30px 20px;
+  text-align: left;
+  transition: transform 0.3s, border-color 0.3s;
+}
+
+.plan-card:hover {
+  transform: translateY(-5px);
+  border-color: #493DC7;
+}
+
+.plan-card.featured {
+  border: 2px solid #493DC7;
+}
+
+.plan-card h4 {
+  margin-top: 0;
+  color: #493DC7;
+  font-size: 1.5rem;
+}
+
+.subtitle {
+  color: #666;
+  font-size: 0.95rem;
+  margin-bottom: 15px;
+}
+
+.price {
+  font-size: 1.8rem;
+  font-weight: 700;
+  margin: 10px 0 20px;
+}
+
+.price span {
+  font-size: 1rem;
+  color: #666;
+}
+
+.plan-card ul {
+  list-style: none;
+  padding: 0;
+  margin: 20px 0;
+}
+
+.plan-card ul li {
+  margin: 10px 0;
+  position: relative;
+  padding-left: 20px;
+}
+
+.plan-card ul li::before {
+  content: "✔";
+  color: #493DC7;
+  position: absolute;
+  left: 0;
+}
+
+.select-button {
+  width: 100%;
+  padding: 12px 0;
+  background: linear-gradient(135deg, #493DC7 0%, #6A5ACD 100%);
+  color: white;
+  border: none;
+  border-radius: 8px;
+  font-weight: 600;
+  cursor: pointer;
+  transition: background 0.3s;
+}
+
+.select-button:hover {
+  background: linear-gradient(135deg, #3f34b5 0%, #5942b0 100%);
+}

@@ -1,7 +1,49 @@
+{% load static %}
 <!DOCTYPE html>
+<html lang="en">
 <head>
     <meta charset="UTF-8">
+    <title>Choose Your Plan</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css">
+    <link rel="stylesheet" href="{% static 'cram_app/landing_page_styles.css' %}">
 </head>
 <body>
-    
+    <div class="plans-container">
+        <p class="trial-note">All plans include a 3-day free trial</p>
+
+        <div class="plan-cards">
+            <div class="plan-card">
+                <h4>Monthly</h4>
+                <p class="subtitle">Perfect for quick exam prep</p>
+                <p class="price">$3.99<span>/month</span></p>
+                <ul>
+                    <li>Unlimited AI summaries</li>
+                    <li>Advanced AI question prediction</li>
+                    <li>1-page AI study guides</li>
+                    <li>Quizlet-style practice</li>
+                    <li>Cancel anytime</li>
+                </ul>
+                <a href="{% url 'signup'?plan='monthly' %}">
+                    <button class="select-button">Choose Monthly</button>
+                </a>
+            </div>
+
+            <div class="plan-card featured">
+                <h4>Yearly</h4>
+                <p class="subtitle">Best value for serious students</p>
+                <p class="price">$19.99<span>/month</span></p>
+                <ul>
+                    <li>Everything in Monthly plan</li>
+                    <li>Priority support</li>
+                    <li>Early access to new features</li>
+                    <li>Saves 50% vs Monthly plan</li>
+                    <li>Cancel anytime</li>
+                </ul>
+                <a href="{% url 'signup'?plan='yearly' %}">
+                    <button class="select-button">Choose Yearly</button>
+                </a>
+            </div>
+        </div>
+    </div>
 </body>
+</html>
