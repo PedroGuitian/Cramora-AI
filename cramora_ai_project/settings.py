@@ -81,8 +81,8 @@ DATABASES = {
     'default': {
         'ENGINE': 'django.db.backends.postgresql',
         'NAME': 'cramora_db',
-        'USER': 'cramora_user',
-        'PASSWORD': 'your_strong_password',  # same one you set earlier
+        'USER': 'pedroguitianperez',
+        'PASSWORD': 'your_password_here',  # your Postgres password
         'HOST': 'localhost',
         'PORT': '5432',
     }
@@ -142,3 +142,5 @@ INTERNAL_IPS = [
 
 LOGIN_REDIRECT_URL = 'home'
 LOGOUT_REDIRECT_URL = 'login'
+
+AUTH_USER_MODEL = 'cram_app.CustomUser'

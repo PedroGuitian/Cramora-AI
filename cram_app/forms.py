@@ -1,5 +1,21 @@
+from .models import TestQuestion, CustomUser
 from django import forms
-from .models import TestQuestion
+from django.contrib.auth.forms import UserCreationForm, AuthenticationForm
+from django.contrib.auth import get_user_model
+
+class CustomAuthenticationForm(AuthenticationForm):
+    username = forms.EmailField(label="Email", widget=forms.EmailInput(attrs={"autofocus": True}))
+
+    class Meta:
+        model = get_user_model()
+        fields = ['username', 'password']
+
+
+class CustomUserCreationForm(UserCreationForm):
+    class Meta:
+        model = CustomUser
+        fields = ("email",)
+
 
 class TestQuestionForm(forms.ModelForm):
     wrong1 = forms.CharField(label="", max_length=255, required=False)
