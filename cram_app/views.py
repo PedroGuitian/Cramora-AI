@@ -24,7 +24,16 @@ class CustomLoginView(LoginView):
 class CustomLogoutView(LogoutView):
     next_page = 'login'  # Redirect to login after logout
 
+def landing_page(request):
+    return render(request, "cram_app/landing_page.html")
+
 def signup_view(request):
+    plan = request.GET.get('plan', 'free')
+    if plan in ['monthly', 'yearly']:
+        request.session['selected_plan'] = plan
+    else:
+        request.session['selected_plan'] = 'free'
+
     if request.method == "POST":
         form = CustomUserCreationForm(request.POST)
         if form.is_valid():
@@ -34,6 +43,21 @@ def signup_view(request):
     else:
         form = CustomUserCreationForm()
     return render(request, "cram_app/signup.html", {"form": form})
+
+def payment_view(request):
+    selected_plan = request.session.get('selected_plan')
+    if selected_plan == 'free':
+        return redirect('home')
+    elif selected_plan == 'monthly':
+         price_id = 'stripe_price_id_for_monthly'
+    elif selected_plan == 'yearly':
+        price_id = 'stripe_price_id_for_yearly'
+    else:
+        return HttpResponseBadRequest("Invalid plan selected.")
+
+    return render(request, "cram_app/payment.html", {
+        "selected_plan": selected_plan
+    })
 
 @login_required
 def home(request):

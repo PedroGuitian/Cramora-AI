@@ -4,6 +4,7 @@ from .views import CustomLoginView, CustomLogoutView
 
 urlpatterns = [
     path('', views.home, name='home'),
+    path('cramora/', views.landing_page, name='landing_page'),
     path('signup/', views.signup_view, name='signup'),
     path('login/', CustomLoginView.as_view(), name='login'),
     path('logout/', CustomLogoutView.as_view(), name='logout'),
@@ -17,5 +18,5 @@ urlpatterns = [
     path("question/<int:question_id>/edit/", views.edit_question, name="edit_question"),
     path("question/<int:question_id>/delete/", views.delete_question, name="delete_question"),
     path('cram-hub/<int:hub_id>/add-question/', views.add_question, name='add_question'),
-    path("cram-hub/<int:hub_id>/quiz/", views.take_quiz, name="take_quiz")
+    path("cram-hub/<int:hub_id>/quiz/", views.take_quiz, name="take_quiz"),
 ]
