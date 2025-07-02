@@ -10,8 +10,8 @@
   <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css">
 </head>
 <body>
-  <div class="layout {% if not user.is_authenticated %}no-sidebar{% endif %}">
-    {% if user.is_authenticated %}
+  <div class="layout {% if not user.is_authenticated or hide_sidebar %}no-sidebar{% endif %}">
+    {% if user.is_authenticated and not hide_sidebar %}
     <nav class="sidebar">
       <img src="{% static 'cram_app/images/cramora-logo.png' %}" alt="Cramora AI" class="logo-img">
       <a href="{% url 'home' %}" class="nav-link {% active_class 'home' %}">Home</a>
