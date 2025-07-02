@@ -140,6 +140,8 @@ INTERNAL_IPS = [
     "127.0.0.1",
 ]
 
+# In settings.py
+LOGIN_URL = '/login/'
 LOGIN_REDIRECT_URL = 'home'
 LOGOUT_REDIRECT_URL = 'login'
 

@@ -13,13 +13,20 @@ from .models import CramHub, UploadedFile, CramSheet, TestQuestion
 from django.utils.safestring import mark_safe
 from .forms import CustomUserCreationForm
 from .forms import CustomUserCreationForm, CustomAuthenticationForm
+from django.urls import reverse_lazy
 
 
 client = OpenAI(api_key=os.getenv("OPENAI_API_KEY"))
 
 class CustomLoginView(LoginView):
-    template_name = 'cram_app/login.html'
+    template_name = 'registration/login.html'  # cram_app/login.html
     authentication_form = CustomAuthenticationForm
+    redirect_authenticated_user = True
+
+    def get_success_url(self):
+        from django.urls import reverse_lazy
+        return reverse_lazy('home')
+
 
 class CustomLogoutView(LogoutView):
     next_page = 'login'  # Redirect to login after logout
