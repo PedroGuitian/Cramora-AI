@@ -49,7 +49,10 @@ def signup_view(request):
             return redirect("home")
     else:
         form = CustomUserCreationForm()
-    return render(request, "cram_app/signup.html", {"form": form})
+    return render(request, "cram_app/signup.html", {
+        "form": form,
+        "hide_sidebar": True
+        })
 
 def payment_view(request):
     selected_plan = request.session.get('selected_plan')
