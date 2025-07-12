@@ -9,11 +9,19 @@
     {% if hubs %}
       <ul class="hub-list">
         {% for hub in hubs %}
-          <li class="hub-list-item">
+        <li class="hub-list-item">
+          <div class="hub-item-container">
             <a href="{% url 'cram_hub_dashboard' hub.id %}" class="hub-link">
               {{ hub.title }}
             </a>
-          </li>
+            <form action="{% url 'delete_cram_hub' hub.id %}" method="post" class="delete-form">
+              {% csrf_token %}
+              <button type="submit" class="delete-link" title="Delete">
+                <i class="fas fa-trash"></i>
+              </button>
+            </form>
+          </div>
+        </li>
         {% endfor %}
       </ul>
     {% else %}
