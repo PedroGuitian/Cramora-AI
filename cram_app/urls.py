@@ -19,4 +19,5 @@ urlpatterns = [
     path("question/<int:question_id>/delete/", views.delete_question, name="delete_question"),
     path('cram-hub/<int:hub_id>/add-question/', views.add_question, name='add_question'),
     path("cram-hub/<int:hub_id>/quiz/", views.take_quiz, name="take_quiz"),
+    path('cram_hub/<int:hub_id>/delete/', views.delete_cram_hub, name='delete_cram_hub'),
 ]

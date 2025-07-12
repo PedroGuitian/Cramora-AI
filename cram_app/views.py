@@ -441,3 +441,8 @@ def take_quiz(request, hub_id):
         "hub": hub,
         "questions_json": mark_safe(json.dumps(questions_data)),
     })
+
+def delete_cram_hub(request, hub_id):
+    hub = get_object_or_404(CramHub, id=hub_id, user=request.user)
+    hub.delete()
+    return redirect('my_cram_hubs')
