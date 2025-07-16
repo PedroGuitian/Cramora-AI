@@ -1,19 +1,32 @@
-import os, json, markdown, tiktoken, fitz
-from .forms import TestQuestionForm, EditTestQuestionForm
+# Standard library
+import os
+import json
+
+# Third-party
+import markdown
+import tiktoken
+import fitz
+
 from openai import OpenAI
-from django.contrib.auth.forms import UserCreationForm
 from django.contrib.auth import login
-from django.shortcuts import render, redirect, get_object_or_404
 from django.contrib.auth.decorators import login_required
+from django.contrib.auth.forms import UserCreationForm
 from django.contrib.auth.views import LoginView, LogoutView
 from django.http import JsonResponse, HttpResponseBadRequest
-from django.core.serializers.json import DjangoJSONEncoder
-from django.views.decorators.http import require_POST
-from .models import CramHub, UploadedFile, CramSheet, TestQuestion
-from django.utils.safestring import mark_safe
-from .forms import CustomUserCreationForm
-from .forms import CustomUserCreationForm, CustomAuthenticationForm
+from django.shortcuts import render, redirect, get_object_or_404
 from django.urls import reverse_lazy
+from django.utils.safestring import mark_safe
+from django.views.decorators.http import require_POST
+from datetime import date, timedelta
+
+# Local
+from .forms import (
+    CustomUserCreationForm,
+    CustomAuthenticationForm,
+    TestQuestionForm,
+    EditTestQuestionForm,
+)
+from .models import CramHub, UploadedFile, CramSheet, TestQuestion
 
 
 client = OpenAI(api_key=os.getenv("OPENAI_API_KEY"))
@@ -30,6 +43,32 @@ class CustomLoginView(LoginView):
 
 class CustomLogoutView(LogoutView):
     next_page = 'login'  # Redirect to login after logout
+
+def check_and_increment_ai_usage(user, limit=100):
+    today = date.today()
+
+    # Reset if new month
+    if user.usage_reset_date is None or today >= user.usage_reset_date:
+        user.monthly_ai_requests = 0
+        # Set next reset to first of next month
+        next_month = today.replace(day=28) + timedelta(days=4)
+        user.usage_reset_date = next_month.replace(day=1)
+
+    if user.monthly_ai_requests >= limit:
+        return False  # Block further requests
+
+    # Increment usage
+    user.monthly_ai_requests += 1
+    print(f"User's requests this month: {user.monthly_ai_requests}")
+    user.save()
+    return True  # Allow request
+
+def estimate_tokens(text):
+    try:
+        enc = tiktoken.encoding_for_model("gpt-4")
+        return len(enc.encode(text))
+    except Exception:
+        return int(len(text) / 4)  # fallback
 
 def landing_page(request):
     return render(request, "cram_app/landing_page.html")
@@ -130,6 +169,8 @@ def create_cram_hub(request):
 @login_required
 def generate_cram_sheet(request, hub_id):
     hub = get_object_or_404(CramHub, id=hub_id, user=request.user)
+    if not check_and_increment_ai_usage(request.user, limit=100):
+        return HttpResponseBadRequest("You have reached your monthly AI request limit. Please upgrade or wait for next month.")
     files = hub.files.all()
 
     full_text = ""
@@ -151,6 +192,10 @@ def generate_cram_sheet(request, hub_id):
 
         except Exception as e:
             print(f"❌ Could not process {file.original_filename}: {e}")
+    
+    max_prompt_tokens = 15000
+    if estimate_tokens(full_text) > max_prompt_tokens:
+        full_text = full_text[:60000]  
 
     prompt = f"""
         You are a helpful study assistant. Summarize the following study material into a structured and compact 1-page cram sheet.
@@ -194,16 +239,12 @@ def generate_cram_sheet(request, hub_id):
 
     return redirect("cram_hub_dashboard", hub_id=hub.id)
 
-def estimate_tokens(text):
-    try:
-        enc = tiktoken.encoding_for_model("gpt-4")
-        return len(enc.encode(text))
-    except Exception:
-        return int(len(text) / 4)  # fallback
-
 @login_required
 def generate_test_questions(request, hub_id):
     hub = get_object_or_404(CramHub, id=hub_id, user=request.user)
+    if not check_and_increment_ai_usage(request.user, limit=100):
+        return HttpResponseBadRequest("You have reached your monthly AI request limit. Please upgrade or wait for next month.")
+
     files = hub.files.all()
     full_text = ""
 
@@ -329,8 +370,6 @@ def my_cram_hubs(request):
     return render(request, 'cram_app/my_cram_hubs.html', {
         'hubs': hubs
     })
-
-import os
 
 @login_required
 def add_files_to_hub(request, hub_id):
