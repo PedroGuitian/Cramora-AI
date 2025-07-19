@@ -10,17 +10,19 @@
 <body>
     <div class="plans-container">
         <p class="trial-note">All plans include a 3-day free trial</p>
-
         <div class="plan-cards">
             <div class="plan-card">
                 <h4>Monthly</h4>
                 <p class="subtitle">Perfect for quick exam prep</p>
                 <p class="price">$3.99<span>/month</span></p>
                 <ul>
-                    <li>Unlimited AI summaries</li>
-                    <li>Advanced AI question prediction</li>
+                    <!-- <li>Unlimited AI summaries</li> -->
+                    <!-- <li>AI tutor (Coming soon)</li> -->
+                    <!-- <li>Smart-Highlighting (Coming soon)</li> -->
+                    <li>AI test questions predictor</li>
                     <li>1-page AI study guides</li>
                     <li>Quizlet-style practice</li>
+                    <li>Video summarizer (Coming soon)</li>
                     <li>Cancel anytime</li>
                 </ul>
                 <a href="{% url 'signup' %}?plan='monthly'">
@@ -43,6 +45,7 @@
                     <button class="select-button">Choose Yearly</button>
                 </a>
             </div>
+            <p class="trial-note">Lock in this price forever (cheaper it will ever be)</p>
         </div>
     </div>
 </body>
