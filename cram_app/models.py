@@ -2,6 +2,7 @@ from django.db import models
 import random
 from django.contrib.auth.models import AbstractBaseUser, BaseUserManager, PermissionsMixin
 from django.conf import settings
+from datetime import date
 
 class CustomUserManager(BaseUserManager):
     def create_user(self, email, password=None, **extra_fields):
@@ -31,6 +32,8 @@ class CustomUser(AbstractBaseUser, PermissionsMixin):
     is_active = models.BooleanField(default=True)
     is_staff = models.BooleanField(default=False)
     date_joined = models.DateTimeField(auto_now_add=True)
+    monthly_ai_requests = models.IntegerField(default=0)
+    usage_reset_date = models.DateField(default=date.today)
 
     objects = CustomUserManager()
 
